@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
-import { GraphQLError } from "graphql";
+import { GraphQLError } from "graphql/error";
 import dotenv from "dotenv";
-import { createError } from "./errorHandler.js";
 
 dotenv.config();
 
@@ -13,20 +12,20 @@ dotenv.config();
 export const authenticateToken = ({ req }: { req: any }) => {
   let token = req.body.token || req.query.token || req.headers.authorization;
 
-  if (req.headers.authorization) {
-    if (token.startsWith("Bearer ")) {
-      token = token.split(" ")[1].trim();
-    }
+  if (token?.startsWith("Bearer ")) {
+    token = token.split(" ")[1].trim();
   }
 
   if (!token) {
     console.log(`No token provided for ${req.body.operationName}.`);
-    return req;
+    return req; // Continue without authentication
   }
 
   try {
     if (!process.env.JWT_SECRET) {
-      throw createError("JWT secret is missing in environment variables.", 500);
+      throw new GraphQLError("JWT secret is missing in environment variables.", {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
     }
 
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET, {
@@ -34,10 +33,12 @@ export const authenticateToken = ({ req }: { req: any }) => {
     });
 
     req.user = decoded.data;
-    console.log("Token verified. User:", req.user);
+    console.log("✅ Token verified. User:", req.user);
   } catch (err: any) {
-    console.error("Invalid token:", err);
-    throw createError("Invalid or expired token. Please log in again.", 401);
+    console.error("❌ Invalid token:", err);
+    throw new GraphQLError("Invalid or expired token. Please log in again.", {
+      extensions: { code: "UNAUTHENTICATED" },
+    });
   }
 
   return req;
@@ -45,23 +46,20 @@ export const authenticateToken = ({ req }: { req: any }) => {
 
 /**
  * Generates a signed JWT token for authentication.
- * @param {string} username - The username of the user.
+ * @param {string} fullName - The full name of the user.
  * @param {string} email - The email of the user.
  * @param {unknown} _id - The user's ID.
- * @param {boolean} isAdmin - Whether the user is an admin.
  * @returns {string} - A JWT token.
  */
-export const signToken = (
-  username: string,
-  email: string,
-  _id: unknown,
-  isAdmin: boolean
-): string => {
+export const signToken = (fullName: string, email: string, _id: unknown): string => {
   if (!process.env.JWT_SECRET) {
-    throw createError("JWT secret is missing in environment variables.", 500);
+    throw new GraphQLError("JWT secret is missing in environment variables.", {
+      extensions: { code: "INTERNAL_SERVER_ERROR" },
+    });
   }
 
-  const payload = { username, email, _id, isAdmin };
+  const payload = { fullName, email, _id };
+
   return jwt.sign({ data: payload }, process.env.JWT_SECRET, {
     expiresIn: "2h",
   });
