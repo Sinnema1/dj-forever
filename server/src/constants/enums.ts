@@ -1,0 +1,1 @@
+// Enum values (e.g., RSVP status)
