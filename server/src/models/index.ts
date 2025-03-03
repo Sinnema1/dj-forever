@@ -1,2 +1,4 @@
 import User from './User.js';
-export { User };
+import RSVP from './RSVP.js';
+
+export { User, RSVP };

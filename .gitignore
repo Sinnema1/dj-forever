@@ -1,4 +1,4 @@
-# Logs
+# Logs and debugging files
 logs
 *.log
 npm-debug.log*
@@ -6,58 +6,73 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
-
-# Diagnostic reports
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-# Runtime data
+# Runtime and process data
 pids
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directories
+# Coverage files
 coverage/
-*.lcov
 .nyc_output
+*.lcov
 
 # Dependency directories
 node_modules/
 jspm_packages/
-bower_components
-web_modules/
 
-# Build output
-build/
-dist/
-.next
-.nuxt
-.cache
-.parcel-cache
-.docusaurus
-.temp
+# Build output directories
+/build/
+/dist/
+/server/dist/
+/client/build/
+/client/dist/
 
-# Vite build output
-client/dist/
-client/.vite/
-
-# TypeScript cache
+# TypeScript cache and build info
 *.tsbuildinfo
+.tsconfig.tsbuildinfo
 
-# Optional caches
-.npm
-.eslintcache
-.stylelintcache
+# IDE and editor settings
+.vscode/
+.idea/
+*.swp
 
-# dotenv environment variable files
-.env
-.env.*
-client/.env
-
-# Server logs
-server/logs/
-server/temp/
-
-# Miscellaneous OS/Editor Files
+# OS and system files
 .DS_Store
-.vscode-test
+Thumbs.db
+
+# dotenv environment variable files (important for security)
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# React/Vite-specific cache
+.client/.vite/
+.client/.cache/
+.client/.parcel-cache/
+.client/.next/
+.client/out/
+
+# Express/Node.js server-related exclusions
+.serverless/
+.server/
+
+# GraphQL-related exclusions
+graphql_schema.graphql
+graphql.schema.json
+
+# Docker and CI/CD
+.dockerignore
+.docker/
+circleci/
+.gitlab-ci.yml
+
+# Miscellaneous
+.parcel-cache
+.cache
+.yarn-integrity
+.pnp.*

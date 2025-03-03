@@ -1,0 +1,32 @@
+{
+    "rsvps": [
+      {
+        "userEmail": "alice@example.com",
+        "attending": true,
+        "mealPreference": "Vegetarian",
+        "allergies": "None",
+        "additionalNotes": "Excited for the event!"
+      },
+      {
+        "userEmail": "bob@example.com",
+        "attending": true,
+        "mealPreference": "Chicken",
+        "allergies": "Peanuts",
+        "additionalNotes": "Would love a seat near friends."
+      },
+      {
+        "userEmail": "charlie@example.com",
+        "attending": false,
+        "mealPreference": "N/A",
+        "allergies": "",
+        "additionalNotes": "Unavailable due to prior commitments."
+      },
+      {
+        "userEmail": "diana@example.com",
+        "attending": true,
+        "mealPreference": "Vegan",
+        "allergies": "Shellfish",
+        "additionalNotes": ""
+      }
+    ]
+  }

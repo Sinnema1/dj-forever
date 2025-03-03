@@ -1,4 +1,4 @@
-import { Schema, model, type Document } from "mongoose";
+import { Schema, model, type Document, Types } from "mongoose";
 import bcrypt from "bcrypt";
 
 /**
@@ -6,12 +6,13 @@ import bcrypt from "bcrypt";
  * Defines the structure of a user document in the database.
  */
 export interface UserDocument extends Document {
-  id: string;
-  username: string;
+  _id: Types.ObjectId;
+  fullName: string;
   email: string;
   password: string;
   isCorrectPassword(password: string): Promise<boolean>;
-  isAdmin: boolean;
+  hasRSVPed: boolean;
+  rsvpId?: Types.ObjectId | null;
 }
 
 /**
@@ -20,10 +21,9 @@ export interface UserDocument extends Document {
  */
 const userSchema = new Schema<UserDocument>(
   {
-    username: {
+    fullName: {
       type: String,
-      required: [true, "Username is required."],
-      unique: true,
+      required: [true, "Full name is required."],
       trim: true,
     },
     email: {
@@ -31,21 +31,27 @@ const userSchema = new Schema<UserDocument>(
       required: [true, "Email is required."],
       unique: true,
       match: [/.+@.+\..+/, "Must use a valid email address"],
+      lowercase: true, // ✅ Ensure email consistency (avoids case-sensitive duplicates)
     },
     password: {
       type: String,
       required: [true, "Password is required."],
+      select: false, // ✅ Prevent password from being included in queries
     },
-    isAdmin: {
+    hasRSVPed: {
       type: Boolean,
-      required: true,
       default: false,
+    },
+    rsvpId: {
+      type: Schema.Types.ObjectId,
+      ref: "RSVP",
+      default: null, // RSVP is optional at account creation
     },
   },
   {
-    toJSON: {
-      virtuals: true,
-    },
+    timestamps: true, // ✅ Adds createdAt and updatedAt timestamps
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
