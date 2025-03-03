@@ -5,8 +5,8 @@
     "target": "ES2020" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
     
     /* Modules */
-    "module": "ESNext" /* Specify what module code is generated. */,
-    "moduleResolution": "Bundler" /* Specify how TypeScript looks up a file from a given module specifier. */,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "skipLibCheck": true /* Skip type checking of all declaration files (*.d.ts) for faster builds. */,
     
     /* Root and Output Directories */

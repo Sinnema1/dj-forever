@@ -4,7 +4,7 @@ import {
   authenticateUser,
 } from "../services/userService.js";
 import { submitRSVP, getRSVP, editRSVP } from "../services/rsvpService.js";
-import { createError } from "../middleware/errorHandler.js"; // ✅ Import createError for error handling
+import { createError } from "../middleware/errorHandler.js";
 
 /**
  * Defines input fields for user registration.
@@ -64,7 +64,9 @@ const resolvers = {
     getRSVP: async (_parent: any, _args: any, context: Context) => {
       try {
         if (!context.user) throw createError("Authentication required.", 401);
-        return await getRSVP(context.user._id);
+        const rsvp = await getRSVP(context.user._id);
+        if (!rsvp) throw createError("No RSVP found for this user.", 404);
+        return rsvp;
       } catch (error: any) {
         throw createError(`Failed to retrieve RSVP: ${error.message}`, 500);
       }
@@ -73,8 +75,8 @@ const resolvers = {
 
   Mutation: {
     /**
-     * Registers a new user.
-     * @returns {Promise<{ token: string; user: User }>} Authentication token and user details.
+     * Registers a new user and returns an authentication token.
+     * @returns {Promise<{ token: string; user: User }>}
      */
     registerUser: async (
       _parent: any,
@@ -89,7 +91,7 @@ const resolvers = {
 
     /**
      * Authenticates a user and returns a JWT token.
-     * @returns {Promise<{ token: string; user: User }>} Authentication token and user details.
+     * @returns {Promise<{ token: string; user: User }>}
      */
     loginUser: async (_parent: any, { email, password }: LoginInput) => {
       try {
@@ -101,7 +103,8 @@ const resolvers = {
 
     /**
      * Submits an RSVP for the authenticated user.
-     * @returns {Promise<RSVP>} The submitted RSVP details.
+     * Ensures a user cannot submit multiple RSVPs.
+     * @returns {Promise<RSVP>}
      */
     submitRSVP: async (
       _parent: any,
@@ -110,6 +113,10 @@ const resolvers = {
     ) => {
       try {
         if (!context.user) throw createError("Authentication required.", 401);
+
+        const existingRSVP = await getRSVP(context.user._id);
+        if (existingRSVP) throw createError("User has already submitted an RSVP.", 400);
+
         return await submitRSVP(
           context.user._id,
           attending,
@@ -124,7 +131,8 @@ const resolvers = {
 
     /**
      * Updates an existing RSVP for the authenticated user.
-     * @returns {Promise<RSVP>} The updated RSVP details.
+     * Ensures RSVP exists before updating.
+     * @returns {Promise<RSVP>}
      */
     editRSVP: async (
       _parent: any,
@@ -133,6 +141,10 @@ const resolvers = {
     ) => {
       try {
         if (!context.user) throw createError("Authentication required.", 401);
+
+        const existingRSVP = await getRSVP(context.user._id);
+        if (!existingRSVP) throw createError("No RSVP found to update.", 404);
+
         return await editRSVP(context.user._id, updates);
       } catch (error: any) {
         throw createError(`RSVP update failed: ${error.message}`, 400);

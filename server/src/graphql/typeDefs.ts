@@ -12,7 +12,7 @@ const typeDefs = gql`
     fullName: String!
     email: String!
     hasRSVPed: Boolean!
-    rsvp: RSVP
+    rsvpId: ID
   }
 
   """
@@ -59,7 +59,11 @@ const typeDefs = gql`
     """
     Registers a new user and returns an authentication token.
     """
-    registerUser(fullName: String!, email: String!, password: String!): AuthPayload
+    registerUser(
+      fullName: String!
+      email: String!
+      password: String!
+    ): AuthPayload
 
     """
     Authenticates a user and returns a JWT token.
@@ -69,7 +73,12 @@ const typeDefs = gql`
     """
     Submits an RSVP for the authenticated user.
     """
-    submitRSVP(attending: Boolean!, mealPreference: String!, allergies: String, additionalNotes: String): RSVP
+    submitRSVP(
+      attending: Boolean!
+      mealPreference: String!
+      allergies: String
+      additionalNotes: String
+    ): RSVP
 
     """
     Updates an existing RSVP for the authenticated user.

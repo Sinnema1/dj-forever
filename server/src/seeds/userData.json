@@ -1,16 +1,32 @@
 {
   "users": [
     {
-      "username": "user1",
-      "email": "user1@example.com",
-      "password": "password123",
-      "isAdmin": false
+      "fullName": "Alice Johnson",
+      "email": "alice@example.com",
+      "password": "SecurePass123!",
+      "hasRSVPed": true,
+      "rsvpId": "65d1f90a1c2a4b001e4a5a8c"
     },
     {
-      "username": "admin",
-      "email": "admin@example.com",
-      "password": "password456",
-      "isAdmin": true
+      "fullName": "Bob Smith",
+      "email": "bob@example.com",
+      "password": "SecurePass456!",
+      "hasRSVPed": true,
+      "rsvpId": "65d1f90a1c2a4b001e4a5a8d"
+    },
+    {
+      "fullName": "Charlie Williams",
+      "email": "charlie@example.com",
+      "password": "SecurePass789!",
+      "hasRSVPed": false,
+      "rsvpId": null
+    },
+    {
+      "fullName": "Diana Brown",
+      "email": "diana@example.com",
+      "password": "SecurePassABC!",
+      "hasRSVPed": true,
+      "rsvpId": "65d1f90a1c2a4b001e4a5a8e"
     }
   ]
 }

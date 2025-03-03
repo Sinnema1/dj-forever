@@ -1,22 +1,31 @@
 {
-  "name": "my-new-project",
+  "name": "main",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server/server.js",
-    "start:dev": "concurrently \"cd server && npm run watch\" \"wait-on tcp:3001 && cd client && npm run dev\"",
-    "server": "cd server && npm start",
-    "server:dev": "cd server && npm run dev",
-    "install": "cd server && npm i && cd ../client && npm i",
-    "client:build": "cd client && npm run build",
+    "start": "concurrently \"npm run server:start\" \"wait-on tcp:3001 && npm run client:start\"",
+    "dev": "concurrently \"npm run server:watch\" \"wait-on tcp:3001 && npm run client:dev\"",
+    "server:start": "cd server && npm start",
+    "server:watch": "cd server && npm run watch",
+    "client:start": "cd client && npm run preview",
     "client:dev": "cd client && npm run dev",
+    "build": "concurrently \"npm run server:build\" \"npm run client:build\"",
+    "server:build": "cd server && npm run build",
+    "client:build": "cd client && npm run build",
     "seed": "cd server && npm run seed",
-    "build": "concurrently \"cd server && npm run build\" \"cd client && npm run build\"",
+    "install": "npm install && cd server && npm install && cd ../client && npm install",
     "render-build": "npm install && npm run build"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "wait-on": "^7.2.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "apollo-server-express": "^3.13.0"
+  }
 }
