@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
  * Defines the structure of a user document in the database.
  */
 export interface UserDocument extends Document {
-  id: string;
+  _id: Types.ObjectId;
   fullName: string;
   email: string;
   password: string;
@@ -31,10 +31,12 @@ const userSchema = new Schema<UserDocument>(
       required: [true, "Email is required."],
       unique: true,
       match: [/.+@.+\..+/, "Must use a valid email address"],
+      lowercase: true, // ✅ Ensure email consistency (avoids case-sensitive duplicates)
     },
     password: {
       type: String,
       required: [true, "Password is required."],
+      select: false, // ✅ Prevent password from being included in queries
     },
     hasRSVPed: {
       type: Boolean,
@@ -47,9 +49,9 @@ const userSchema = new Schema<UserDocument>(
     },
   },
   {
-    toJSON: {
-      virtuals: true,
-    },
+    timestamps: true, // ✅ Adds createdAt and updatedAt timestamps
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 

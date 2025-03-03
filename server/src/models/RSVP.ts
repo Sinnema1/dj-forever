@@ -1,15 +1,15 @@
-import { Schema, model, type Document } from "mongoose";
+import { Schema, model, type Document, Types } from "mongoose";
 
 /**
  * @interface RSVPDocument
  * Defines the structure of an RSVP document in the database.
  */
 export interface RSVPDocument extends Document {
-  userId: Schema.Types.ObjectId;
+  userId: Types.ObjectId; // ✅ Use `Types.ObjectId` for consistency
   attending: boolean;
   mealPreference: string;
-  allergies?: string | undefined;
-  additionalNotes?: string | undefined;
+  allergies?: string;
+  additionalNotes?: string;
 }
 
 /**
@@ -31,18 +31,23 @@ const rsvpSchema = new Schema<RSVPDocument>(
     mealPreference: {
       type: String,
       required: true,
+      trim: true, // ✅ Ensures no unnecessary spaces
     },
     allergies: {
       type: String,
+      trim: true,
       default: "",
     },
     additionalNotes: {
       type: String,
+      trim: true,
       default: "",
     },
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields automatically
+    timestamps: true, // ✅ Automatically adds `createdAt` and `updatedAt` fields
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 

@@ -8,6 +8,7 @@ import { authenticateToken } from "./middleware/auth.js";
 import { errorHandler, createError } from "./middleware/errorHandler.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { CONFIG } from "./constants/config.js";
 
 // Resolve __dirname in ES module environment
 const __filename = fileURLToPath(import.meta.url);
@@ -17,7 +18,7 @@ const __dirname = path.dirname(__filename);
  * Defines the GraphQL Apollo Context interface.
  */
 export interface ApolloContext {
-  user: { _id: string; username: string } | null;
+  user: { _id: string; fullName: string; email: string } | null;
 }
 
 // Initialize Apollo Server
@@ -30,7 +31,7 @@ const server = new ApolloServer({ typeDefs, resolvers });
 const startApolloServer = async () => {
   try {
     // Validate critical environment variables
-    if (!process.env.JWT_SECRET || !process.env.someAPIKey) {
+    if (!CONFIG.JWT_SECRET || !process.env.someAPIKey) {
       throw createError("Essential environment variables are missing.", 500);
     }
 
@@ -43,9 +44,7 @@ const startApolloServer = async () => {
     /** 
      * Enables CORS for frontend communication.
      */
-    app.use(
-      cors({ origin: process.env.FRONTEND_URL || "http://localhost:3000" })
-    );
+    app.use(cors({ origin: CONFIG.FRONTEND_URL }));
     app.use(express.urlencoded({ extended: false }));
     app.use(express.json());
 
@@ -61,13 +60,24 @@ const startApolloServer = async () => {
             const operationName = req.body?.operationName;
 
             // Skip authentication for login & user registration mutations
-            if (["login", "addUser"].includes(operationName)) {
+            if (["loginUser", "registerUser"].includes(operationName)) {
               return { user: null };
             }
 
             // Authenticate all other requests
             const context = authenticateToken({ req });
-            return { user: context.user || null };
+
+            if (!context.user) {
+              return { user: null };
+            }
+
+            return {
+              user: {
+                _id: context.user._id.toString(),
+                fullName: context.user.fullName,
+                email: context.user.email,
+              },
+            };
           } catch (error) {
             console.error("Authentication error:", error);
             return { user: null };
@@ -104,8 +114,8 @@ const startApolloServer = async () => {
      * Starts the Express server and listens for incoming requests.
      */
     app.listen(PORT, () => {
-      console.log(`API server running on port ${PORT}!`);
-      console.log(`Use GraphQL at http://localhost:${PORT}/graphql`);
+      console.log(`✅ API server running on port ${PORT}!`);
+      console.log(`🚀 Use GraphQL at http://localhost:${PORT}/graphql`);
     });
 
     /**
@@ -117,7 +127,7 @@ const startApolloServer = async () => {
       process.exit(0);
     });
   } catch (error) {
-    console.error("Server startup error:", error);
+    console.error("❌ Server startup error:", error);
     process.exit(1);
   }
 };
