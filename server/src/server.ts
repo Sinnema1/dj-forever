@@ -31,9 +31,9 @@ const server = new ApolloServer({ typeDefs, resolvers });
 const startApolloServer = async () => {
   try {
     // Validate critical environment variables
-    if (!CONFIG.JWT_SECRET || !process.env.someAPIKey) {
-      throw createError("Essential environment variables are missing.", 500);
-    }
+    // if (!CONFIG.JWT_SECRET || !process.env.someAPIKey) {
+    //   throw createError("Essential environment variables are missing.", 500);
+    // }
 
     await server.start();
     await db();
