@@ -5,7 +5,7 @@ import { Schema, model, type Document, Types } from "mongoose";
  * Defines the structure of an RSVP document in the database.
  */
 export interface RSVPDocument extends Document {
-  userId: Types.ObjectId; // ✅ Use `Types.ObjectId` for consistency
+  userId: Types.ObjectId; // Use `Types.ObjectId` for consistency
   attending: boolean;
   mealPreference: string;
   allergies?: string;
@@ -31,7 +31,7 @@ const rsvpSchema = new Schema<RSVPDocument>(
     mealPreference: {
       type: String,
       required: true,
-      trim: true, // ✅ Ensures no unnecessary spaces
+      trim: true, // Ensures no unnecessary spaces
     },
     allergies: {
       type: String,
@@ -45,7 +45,7 @@ const rsvpSchema = new Schema<RSVPDocument>(
     },
   },
   {
-    timestamps: true, // ✅ Automatically adds `createdAt` and `updatedAt` fields
+    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }

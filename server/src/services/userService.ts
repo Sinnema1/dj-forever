@@ -25,7 +25,7 @@ export const getUserById = async (userId: string) => {
 };
 
 /**
- * Registers a new user (pre-created accounts, not public signup).
+ * Registers a new user.
  *
  * @param {string} fullName - The user's full name.
  * @param {string} email - The user's email.
@@ -35,11 +35,14 @@ export const getUserById = async (userId: string) => {
  */
 export const createUser = async (fullName: string, email: string, password: string) => {
   try {
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) throw createError("User already exists.", 400);
 
+    // Create user in database
     const user = await User.create({ fullName, email, password });
 
+    // Generate authentication token
     const token = signToken(user.fullName, user.email, user._id.toString());
 
     return { token, user };
@@ -58,11 +61,25 @@ export const createUser = async (fullName: string, email: string, password: stri
  */
 export const authenticateUser = async (email: string, password: string) => {
   try {
-    const user = await User.findOne({ email });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    // Ensure password is retrieved from the database
+    const user = await User.findOne({ email }).select("+password");
+    
+    if (!user) {
       throw createError("Invalid email or password.", 401);
     }
 
+    // Defensive check before password comparison
+    if (!user.password) {
+      throw createError("User password is missing. Please reset your password.", 500);
+    }
+
+    // Compare provided password with stored hash
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw createError("Invalid email or password.", 401);
+    }
+
+    // Generate JWT token
     const token = signToken(user.fullName, user.email, user._id.toString());
 
     return { token, user };
