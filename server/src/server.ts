@@ -5,7 +5,7 @@ import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { typeDefs, resolvers } from "./graphql/index.js";
 import { authenticateToken } from "./middleware/auth.js";
-import { errorHandler, createError } from "./middleware/errorHandler.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { CONFIG } from "./constants/config.js";
