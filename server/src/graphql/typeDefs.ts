@@ -13,6 +13,7 @@ const typeDefs = gql`
     email: String!
     hasRSVPed: Boolean!
     rsvpId: ID
+    rsvp: RSVP 
   }
 
   """

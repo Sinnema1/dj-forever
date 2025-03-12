@@ -7,7 +7,7 @@
     /* Modules */
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "skipLibCheck": true /* Skip type checking of all declaration files (*.d.ts) for faster builds. */,
+    "skipLibCheck": false /* Skip type checking of all declaration files (*.d.ts) for faster builds. */,
     
     /* Root and Output Directories */
     "rootDir": "src" /* Specify the root folder within your source files. */,
