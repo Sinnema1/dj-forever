@@ -1,4 +1,4 @@
-import { gql } from "apollo-server-express";
+import { gql } from "graphql-tag";
 
 /**
  * GraphQL Type Definitions for User, RSVP, Queries, and Mutations.
