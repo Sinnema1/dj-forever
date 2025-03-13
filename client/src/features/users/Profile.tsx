@@ -1,26 +1,19 @@
-import { useEffect, useState } from "react";
-import { GET_ME } from "../graphql/queries";
-import { UPDATE_USER } from "../graphql/mutations";
-import { useQuery, useMutation } from "@apollo/client";
-import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  CircularProgress,
-  Alert,
-} from "@mui/material";
+import { useEffect, useState } from 'react';
+import { GET_ME } from '../../graphql/auth/queries';
+import { UPDATE_USER } from '../../graphql/auth/mutations';
+import { useQuery, useMutation } from '@apollo/client';
+import { Container, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
 
 export default function AccountPage() {
   const { loading, data, refetch } = useQuery(GET_ME);
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [updateUser, { loading: updating }] = useMutation(UPDATE_USER, {
     onCompleted: () => {
-      setSuccessMessage("✅ Account updated successfully!");
+      setSuccessMessage('✅ Account updated successfully!');
       refetch(); // Refresh user data
     },
     onError: (error) => {
@@ -37,20 +30,20 @@ export default function AccountPage() {
 
   const handleUpdate = async () => {
     try {
-      setSuccessMessage("");
-      setErrorMessage("");
+      setSuccessMessage('');
+      setErrorMessage('');
       await updateUser({
         variables: { username, email },
       });
     } catch (err) {
-      console.error("Error updating account:", err);
+      console.error('Error updating account:', err);
     }
   };
 
   if (loading) return <CircularProgress />;
 
   return (
-    <Container maxWidth="sm" sx={{ textAlign: "center", marginTop: "50px" }}>
+    <Container maxWidth="sm" sx={{ textAlign: 'center', marginTop: '50px' }}>
       <Typography variant="h4" gutterBottom>
         My Account
       </Typography>
@@ -76,13 +69,8 @@ export default function AccountPage() {
       {successMessage && <Alert severity="success">{successMessage}</Alert>}
       {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleUpdate}
-        disabled={updating}
-      >
-        {updating ? <CircularProgress size={24} /> : "Update Account"}
+      <Button variant="contained" color="primary" onClick={handleUpdate} disabled={updating}>
+        {updating ? <CircularProgress size={24} /> : 'Update Account'}
       </Button>
     </Container>
   );

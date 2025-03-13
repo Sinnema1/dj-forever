@@ -1,4 +1,6 @@
-import { useRouteError } from 'react-router-dom';
+import React from 'react';
+import { useRouteError, Link as RouterLink } from 'react-router-dom';
+import { Container, Typography, Box, Button, Paper, useTheme } from '@mui/material';
 
 interface RouteError {
   statusText?: string;
@@ -7,15 +9,45 @@ interface RouteError {
 
 export default function ErrorPage() {
   const error = useRouteError() as RouteError;
+  const theme = useTheme();
+
   console.error(error);
 
   return (
-    <div id="error-page" style={{textAlign: "center"}}>
-      <h1 style={{margin: "20px"}}>Oops!</h1>
-      <p style={{margin: "20px"}}>Sorry, an unexpected error has occurred.</p>
-      <p>
-        <i>{error.statusText || error.message}</i>
-      </p>
-    </div>
+    <Container
+      maxWidth="sm"
+      sx={{
+        display: 'flex',
+        height: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          padding: theme.spacing(4),
+          textAlign: 'center',
+        }}
+      >
+        <Typography variant="h2" color="error" gutterBottom>
+          Oops!
+        </Typography>
+
+        <Typography variant="body1" gutterBottom>
+          Sorry, an unexpected error has occurred.
+        </Typography>
+
+        <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+          {error?.statusText || error?.message || 'Unknown error'}
+        </Typography>
+
+        <Box mt={4}>
+          <Button variant="contained" color="primary" component={RouterLink} to="/">
+            Go to Home
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 }
