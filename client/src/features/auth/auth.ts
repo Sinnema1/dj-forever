@@ -6,7 +6,7 @@ interface UserToken {
   exp: number;
   data: {
     isAdmin: boolean;
-  }
+  };
 }
 
 // create a new class to instantiate for a user
@@ -29,7 +29,7 @@ class AuthService {
       const decoded = jwtDecode<UserToken>(this.getToken());
       if (decoded.data.isAdmin === true) {
         return true;
-      } 
+      }
       return false;
     } catch (err) {
       return false;
@@ -42,8 +42,8 @@ class AuthService {
       const decoded = jwtDecode<UserToken>(token);
       if (decoded.exp < Date.now() / 1000) {
         return true;
-      } 
-      
+      }
+
       return false;
     } catch (err) {
       return false;
@@ -52,7 +52,7 @@ class AuthService {
 
   getToken() {
     // Retrieves the user token from localStorage
-    return localStorage.getItem('id_token')|| '';
+    return localStorage.getItem('id_token') || '';
   }
 
   login(idToken: string) {
