@@ -1,4 +1,3 @@
-// use this to decode a token and get the user's information out of it
 import { jwtDecode } from 'jwt-decode';
 
 interface UserToken {
@@ -9,62 +8,71 @@ interface UserToken {
   };
 }
 
-// create a new class to instantiate for a user
+// Create a new class to instantiate for a user
 class AuthService {
-  // get user data
+  /**
+   * Get user profile from token
+   */
   getProfile() {
     return jwtDecode(this.getToken());
   }
 
-  // check if user's logged in
+  /**
+   * Check if user is logged in
+   */
   loggedIn() {
-    // Checks if there is a saved token and it's still valid
     const token = this.getToken();
-    return !!token && !this.isTokenExpired(token); // handwaiving here
+    return !!token && !this.isTokenExpired(token);
   }
 
-  //check if the logged in user is admin
+  /**
+   * Check if logged in user is admin
+   */
   isAdmin() {
     try {
       const decoded = jwtDecode<UserToken>(this.getToken());
-      if (decoded.data.isAdmin === true) {
-        return true;
-      }
-      return false;
+      return decoded.data.isAdmin === true;
     } catch (err) {
+      console.error('Failed to decode token for admin check:', err);
       return false;
     }
   }
 
-  // check if token is expired
+  /**
+   * Check if token is expired
+   * @param token - JWT token string
+   */
   isTokenExpired(token: string) {
     try {
       const decoded = jwtDecode<UserToken>(token);
-      if (decoded.exp < Date.now() / 1000) {
-        return true;
-      }
-
-      return false;
+      return decoded.exp < Date.now() / 1000;
     } catch (err) {
+      console.error('Failed to decode token for expiry check:', err);
       return false;
     }
   }
 
+  /**
+   * Retrieve the user token from localStorage
+   */
   getToken() {
-    // Retrieves the user token from localStorage
     return localStorage.getItem('id_token') || '';
   }
 
+  /**
+   * Login: save token and redirect
+   * @param idToken - JWT token string
+   */
   login(idToken: string) {
-    // Saves user token to localStorage
     localStorage.setItem('id_token', idToken);
     window.location.assign('/');
   }
 
+  /**
+   * Logout: remove token and reset app state
+   */
   logout() {
-    // Clear user token and profile data from localStorage
     localStorage.removeItem('id_token');
-    // this will reload the page and reset the state of the application
     window.location.assign('/');
   }
 }

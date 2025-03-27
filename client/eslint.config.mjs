@@ -5,6 +5,14 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-plugin-prettier';
 
 export default /** @type {import('eslint').Linter.FlatConfig[]} */ ([
+  {
+    ignores: [
+      'dist/',
+      'build/',
+      'node_modules/',
+      'vite.config.ts',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

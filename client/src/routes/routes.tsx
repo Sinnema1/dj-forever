@@ -2,38 +2,38 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 // Layout
-import AppLayout from './components/layout/AppLayout';
+import AppLayout from '../components/layout/AppLayout';
 
 // Public pages
-import Home from './pages/Home';
-import ErrorPage from './pages/Error';
+import Home from '../pages/Home';
+import ErrorPage from '../pages/Error';
 
 // Features
-import Login from './features/auth/Login';
-import Register from './features/auth/Register';
-import Profile from './features/users/Profile';
-import RSVP from './features/rsvp/RSVP';
+import Login from '../features/auth/components/Login';
+import Register from '../features/auth/components/Register';
+import Profile from '../features/users/pages/Profile';
+import RSVP from '../features/rsvp/pages/RSVP';
 
 // Dashboard
-import Dashboard from './pages/Dashboard';
+import Dashboard from '../features/dashboard/pages/Dashboard';
 
 // Components
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute from '../components/PrivateRoute';
 
 /**
- * AppRoutes defines all routes and applies layout via AppLayout.
+ * AppRoutes defines all routes and applies the AppLayout as a wrapper.
  */
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* All routes wrapped in AppLayout */}
+      {/* Wrap all routes with AppLayout */}
       <Route path="/" element={<AppLayout />}>
-        {/* Public routes */}
+        {/* Public Routes */}
         <Route index element={<Home />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
 
-        {/* Protected routes */}
+        {/* Protected Routes */}
         <Route
           path="dashboard"
           element={
@@ -59,7 +59,7 @@ const AppRoutes = () => {
           }
         />
 
-        {/* Catch-all error route */}
+        {/* Catch-all route for undefined paths */}
         <Route path="*" element={<ErrorPage />} />
       </Route>
     </Routes>

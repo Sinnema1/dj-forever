@@ -19,7 +19,6 @@ const AppLayout = () => {
           sx={{
             flexGrow: 1,
             p: 3,
-            ml: { md: '240px' }, // shifts content for the sidebar
           }}
         >
           <Outlet />

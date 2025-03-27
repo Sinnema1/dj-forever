@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../features/auth/hooks/useAuth';
 
 const PrivateRoute = ({ children }: { children: ReactElement }) => {
   const { user } = useAuth(); // Assuming user is null when not logged in
