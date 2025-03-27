@@ -36,9 +36,18 @@ const App = () => {
             </BrowserRouter>
           </ThemeProvider>
         </AuthProvider>
+        <AuthProvider>
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </ThemeProvider>
+        </AuthProvider>
       </ColorModeContext.Provider>
     </ApolloProvider>
   );
+};
 };
 
 export default App;
