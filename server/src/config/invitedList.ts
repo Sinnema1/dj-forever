@@ -1,6 +1,7 @@
 const invitedEmails: string[] = [
-    'john.doe@example.com',
-    'jane.smith@example.com',
+    'alice@example.com',
+    'bob@example.com',
+    'diana@example.com',
     // add other invited emails here...
   ];
   
