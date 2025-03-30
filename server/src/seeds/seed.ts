@@ -17,15 +17,20 @@ export const seedDatabase = async () => {
     const userData = JSON.parse(fs.readFileSync("./src/seeds/userData.json", "utf-8"));
     const rsvpData = JSON.parse(fs.readFileSync("./src/seeds/rsvpData.json", "utf-8"));
 
-    // ✅ Hash passwords before inserting users
+    // ✅ Hash passwords before inserting users and explicitly map all required fields
     const usersWithHashedPasswords = await Promise.all(
       userData.users.map(async (user: any) => ({
-        ...user,
+        fullName: user.fullName,
+        email: user.email,
         password: await bcrypt.hash(user.password, 10),
+        isInvited: user.isInvited,   // explicitly include isInvited
+        hasRSVPed: user.hasRSVPed      // explicitly include hasRSVPed
       }))
     );
 
-    // ✅ Insert users and retrieve their new IDs
+    console.log("Processed Users:", usersWithHashedPasswords);
+
+    // ✅ Insert users and retrieve their new IDs (MongoDB generates valid ObjectIds)
     const insertedUsers = await User.insertMany(usersWithHashedPasswords);
     console.log(`✅ Inserted ${insertedUsers.length} users.`);
 
