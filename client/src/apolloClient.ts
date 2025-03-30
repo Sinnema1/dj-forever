@@ -1,5 +1,3 @@
-// src/apolloClient.ts
-
 import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 
