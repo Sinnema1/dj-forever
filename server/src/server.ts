@@ -30,11 +30,6 @@ const server = new ApolloServer({ typeDefs, resolvers });
  */
 const startApolloServer = async () => {
   try {
-    // Validate critical environment variables
-    // if (!CONFIG.JWT_SECRET || !process.env.someAPIKey) {
-    //   throw createError("Essential environment variables are missing.", 500);
-    // }
-
     await server.start();
     await db();
 
@@ -43,8 +38,17 @@ const startApolloServer = async () => {
 
     /** 
      * Enables CORS for frontend communication.
+     * The configuration below allows credentials (cookies, authorization headers, etc.)
+     * from the specified frontend URL.
      */
-    app.use(cors({ origin: CONFIG.FRONTEND_URL }));
+    app.use(
+      cors({
+        origin: CONFIG.FRONTEND_URL, // e.g., "https://your-frontend.onrender.com"
+        credentials: true,           // Enable sending credentials
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+      })
+    );
     app.use(express.urlencoded({ extended: false }));
     app.use(express.json());
 
