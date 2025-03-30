@@ -13,6 +13,7 @@ export interface UserDocument extends Document {
   isCorrectPassword(password: string): Promise<boolean>;
   hasRSVPed: boolean;
   rsvpId?: Types.ObjectId | null;
+  isInvited: boolean;
 }
 
 /**
@@ -31,12 +32,12 @@ const userSchema = new Schema<UserDocument>(
       required: [true, "Email is required."],
       unique: true,
       match: [/.+@.+\..+/, "Must use a valid email address"],
-      lowercase: true, // ✅ Ensure email consistency (avoids case-sensitive duplicates)
+      lowercase: true,
     },
     password: {
       type: String,
       required: [true, "Password is required."],
-      select: false, // ✅ Prevent password from being included in queries
+      select: false,
     },
     hasRSVPed: {
       type: Boolean,
@@ -45,11 +46,16 @@ const userSchema = new Schema<UserDocument>(
     rsvpId: {
       type: Schema.Types.ObjectId,
       ref: "RSVP",
-      default: null, // RSVP is optional at account creation
+      default: null,
+    },
+    isInvited: {
+      type: Boolean,
+      required: true,
+      default: false, // Set default value to false
     },
   },
   {
-    timestamps: true, // ✅ Adds createdAt and updatedAt timestamps
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }

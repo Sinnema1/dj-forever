@@ -17,11 +17,6 @@ export const seedDatabase = async () => {
     const userData = JSON.parse(fs.readFileSync("./src/seeds/userData.json", "utf-8"));
     const rsvpData = JSON.parse(fs.readFileSync("./src/seeds/rsvpData.json", "utf-8"));
 
-    // ✅ Clear existing collections
-    await User.deleteMany({});
-    await RSVP.deleteMany({});
-    console.log("✅ Cleared existing users and RSVPs.");
-
     // ✅ Hash passwords before inserting users
     const usersWithHashedPasswords = await Promise.all(
       userData.users.map(async (user: any) => ({
@@ -58,7 +53,6 @@ export const seedDatabase = async () => {
       for (const rsvp of insertedRSVPs) {
         await User.findByIdAndUpdate(rsvp.userId, { rsvpId: rsvp._id, hasRSVPed: true });
       }
-
       console.log("🎉 Database seeding completed successfully!");
     } else {
       console.warn("⚠️ No RSVPs were inserted. Check RSVP data.");
