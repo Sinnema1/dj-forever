@@ -1,3 +1,4 @@
+// client/src/components/layout/Sidebar.tsx
 import React, { useState } from 'react';
 import {
   AppBar,
@@ -28,20 +29,19 @@ const ResponsiveSidebar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { isLoggedIn } = useAuth(); // Retrieve authentication status
+  const { isLoggedIn, user } = useAuth(); // Get authentication status and user info
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  // Drawer content with conditional rendering for RSVP
+  // Drawer content with conditional rendering for RSVP link
   const drawerContent = (
     <Box onClick={isMobile ? handleDrawerToggle : undefined} sx={{ textAlign: 'center' }}>
       <Typography variant="h6" sx={{ my: 2 }}>
         DJ Forever
       </Typography>
       <Divider />
-
       <List>
         {/* Home Link (Always Visible) */}
         <ListItem disablePadding>
@@ -74,13 +74,10 @@ const ResponsiveSidebar = () => {
           </NavLink>
         </ListItem>
 
-        {/* RSVP Link (Visible only when logged in) */}
-        {isLoggedIn && (
+        {/* RSVP Link: Only show if logged in and the user is invited */}
+        {isLoggedIn && user && user.isInvited && (
           <ListItem disablePadding>
-            <NavLink
-              to="/rsvp"
-              style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}
-            >
+            <NavLink to="/rsvp" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
               {({ isActive }) => (
                 <ListItemButton selected={isActive}>
                   <ListItemIcon>

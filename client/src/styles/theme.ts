@@ -7,20 +7,20 @@ export const getDesignTokens = (mode: PaletteMode): Theme => {
       mode,
       ...(mode === 'light'
         ? {
-            // Light mode palette
+            // Light mode palette with softer pastel colors
             primary: {
-              main: '#1976d2',
+              main: '#B2DFDB', // Soft pastel teal
             },
             secondary: {
-              main: '#9c27b0',
+              main: '#F8BBD0', // Soft pastel pink
             },
             background: {
-              default: '#f5f5f5',
+              default: '#FFF8E1', // Light warm background
               paper: '#ffffff',
             },
           }
         : {
-            // Dark mode palette
+            // Dark mode palette (maintaining current accents)
             primary: {
               main: '#90caf9',
             },
@@ -33,14 +33,16 @@ export const getDesignTokens = (mode: PaletteMode): Theme => {
             },
           }),
     },
-
     typography: {
+      // Default body text remains Roboto
       fontFamily: 'Roboto, sans-serif',
       h1: {
+        fontFamily: '"Dancing Script", cursive, Roboto, sans-serif', // Fancy script for headings
         fontSize: '2.5rem',
         fontWeight: 700,
       },
       h2: {
+        fontFamily: '"Dancing Script", cursive, Roboto, sans-serif',
         fontSize: '2rem',
         fontWeight: 600,
       },
@@ -70,5 +72,17 @@ export const getDesignTokens = (mode: PaletteMode): Theme => {
         textTransform: 'none',
       },
     },
+    // Apply a softer, less boxy feel
+    shape: {
+      borderRadius: 12,
+    },
+    // Subtle shadows for gentle elevation
+    shadows: [
+      'none',
+      '0px 2px 4px rgba(0,0,0,0.1)',
+      '0px 3px 6px rgba(0,0,0,0.1)',
+      ...Array(22).fill('none'),
+    ] as unknown as Theme['shadows'],
+    spacing: 8, // Default spacing unit; adjust as needed for more whitespace
   });
 };

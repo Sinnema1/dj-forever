@@ -8,6 +8,7 @@ export const LOGIN_USER = gql`
         _id
         fullName
         email
+        isInvited
       }
     }
   }
@@ -21,6 +22,7 @@ export const REGISTER_USER = gql`
         _id
         fullName
         email
+        isInvited
       }
     }
   }
