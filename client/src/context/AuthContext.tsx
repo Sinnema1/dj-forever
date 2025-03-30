@@ -37,11 +37,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         variables: { email, password },
       });
 
+      // Expecting the mutation to return a token and a user object with isInvited
       const authToken: string = data?.login?.token;
       const authUser: UserType = data?.login?.user;
 
       if (!authToken || !authUser) {
         throw new Error('Invalid login response.');
+      }
+
+      // Optional: warn if isInvited is missing from the response
+      if (authUser.isInvited === undefined) {
+        console.warn('Warning: isInvited field is missing from the login response.');
       }
 
       // Update state and localStorage
@@ -69,11 +75,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         variables: { fullName, email, password },
       });
 
+      // Expecting the mutation to return a token and a user object with isInvited
       const authToken: string = data?.register?.token;
       const authUser: UserType = data?.register?.user;
 
       if (!authToken || !authUser) {
         throw new Error('Invalid registration response.');
+      }
+
+      // Optional: warn if isInvited is missing from the response
+      if (authUser.isInvited === undefined) {
+        console.warn('Warning: isInvited field is missing from the registration response.');
       }
 
       // Update state and localStorage
