@@ -1,7 +1,17 @@
 import React from 'react';
 import { Box, Container, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const Home: React.FC = () => {
+  // Initialize the navigate function from React Router
+  const navigate = useNavigate();
+
+  // Handler for the Get Started button click
+  const handleGetStarted = () => {
+    // Redirect to the login page
+    navigate('/login');
+  };
+
   return (
     <Box
       sx={{
@@ -18,7 +28,12 @@ const Home: React.FC = () => {
         <Typography variant="h5" gutterBottom>
           Your Ultimate Event RSVP Management Platform
         </Typography>
-        <Button variant="contained" color="secondary" sx={{ mt: 4 }}>
+        <Button
+          variant="contained"
+          color="secondary"
+          sx={{ mt: 4 }}
+          onClick={handleGetStarted} // Navigate to /login on click
+        >
           Get Started
         </Button>
       </Container>

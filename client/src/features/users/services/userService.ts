@@ -39,18 +39,32 @@ export const useUsers = (userId?: string) => {
     variables: { id: userId },
   });
 
+  // Mutation for updating a user
   const [updateUserMutation] = useMutation<
     UpdateUserResponse,
     { id: string; input: UpdateUserInput }
   >(UPDATE_USER);
 
+  // Mutation for deleting a user
   const [deleteUserMutation] = useMutation<DeleteUserResponse, { id: string }>(DELETE_USER);
 
+  /**
+   * Updates the user and refetches user data.
+   * @param id - The user ID.
+   * @param input - The update payload.
+   */
   const updateUser = async (id: string, input: UpdateUserInput) => {
     await updateUserMutation({ variables: { id, input } });
-    refetchUser && refetchUser();
+    // Explicitly check and call refetchUser to satisfy ESLint rules
+    if (refetchUser) {
+      refetchUser();
+    }
   };
 
+  /**
+   * Deletes a user and refetches the user list.
+   * @param id - The user ID.
+   */
   const deleteUser = async (id: string) => {
     await deleteUserMutation({ variables: { id } });
     refetchUsers();

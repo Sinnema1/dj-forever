@@ -5,15 +5,26 @@ import { gql } from "graphql-tag";
  */
 const typeDefs = gql`
   """
+  Enum representing the RSVP attendance status.
+  """
+  enum AttendanceStatus {
+    YES
+    NO
+    MAYBE
+  }
+
+  """
   Represents a registered user.
   """
   type User {
     _id: ID!
     fullName: String!
     email: String!
+    isAdmin: Boolean!
+    isInvited: Boolean!
     hasRSVPed: Boolean!
     rsvpId: ID
-    rsvp: RSVP 
+    rsvp: RSVP
   }
 
   """
@@ -22,17 +33,18 @@ const typeDefs = gql`
   type RSVP {
     _id: ID!
     userId: ID!
-    attending: Boolean!
+    attending: AttendanceStatus!
     mealPreference: String!
     allergies: String
     additionalNotes: String
+    createdAt: String! # Consider using a custom scalar (e.g. DateTime) if needed
   }
 
   """
   Input type for submitting or updating an RSVP.
   """
   input RSVPInput {
-    attending: Boolean!
+    attending: AttendanceStatus!
     mealPreference: String!
     allergies: String
     additionalNotes: String
@@ -75,7 +87,7 @@ const typeDefs = gql`
     Submits an RSVP for the authenticated user.
     """
     submitRSVP(
-      attending: Boolean!
+      attending: AttendanceStatus!
       mealPreference: String!
       allergies: String
       additionalNotes: String
