@@ -12,84 +12,51 @@ import {
   Alert,
   Typography,
 } from '@mui/material';
-
 import { useRSVP } from '../hooks/useRSVP';
-import { RSVP } from '../types/rsvpTypes';
 
 const RSVPList = () => {
-  const { rsvps, loading, error } = useRSVP();
+  const { rsvp, loading, error } = useRSVP();
 
-  if (error) {
-    return <Alert severity="error">Failed to load RSVPs.</Alert>;
-  }
+  if (loading) return <CircularProgress />;
+  if (error)   return <Alert severity="error">Failed to load RSVP.</Alert>;
+
+  // Treat the single object as a one-element list
+  const rows = rsvp ? [rsvp] : [];
 
   return (
-    <Box sx={{ position: 'relative' }}>
-      {/* Loading overlay */}
-      {loading && (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            zIndex: 1,
-          }}
-        >
-          <CircularProgress />
-        </Box>
-      )}
+    <Box>
+      <Typography variant="h5" sx={{ m: 2 }}>
+        Your RSVP
+      </Typography>
 
-      <TableContainer component={Paper} sx={{ mt: 4, overflowX: 'auto' }}>
-        <Typography variant="h5" sx={{ m: 2 }}>
-          RSVP List
-        </Typography>
-
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Full Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Attending</TableCell>
-              <TableCell>Guests</TableCell>
-              <TableCell>Notes</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {rsvps.length === 0 ? (
+      {rows.length === 0 ? (
+        <Alert severity="info">No RSVP submitted yet.</Alert>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No RSVPs found.
-                </TableCell>
+                <TableCell>Attending</TableCell>
+                <TableCell>Meal</TableCell>
+                <TableCell>Allergies</TableCell>
+                <TableCell>Notes</TableCell>
+                <TableCell>Submitted</TableCell>
               </TableRow>
-            ) : (
-              rsvps.map((rsvp: RSVP) => (
-                <TableRow key={rsvp._id}>
-                  <TableCell>{rsvp.fullName}</TableCell>
-                  <TableCell>{rsvp.email}</TableCell>
-                  <TableCell>
-                    {rsvp.attending === 'yes'
-                      ? 'Yes'
-                      : rsvp.attending === 'no'
-                        ? 'No'
-                        : rsvp.attending === 'maybe'
-                          ? 'Maybe'
-                          : '-'}
-                  </TableCell>
-                  <TableCell>{rsvp.guests}</TableCell>
-                  <TableCell>{rsvp.notes || '-'}</TableCell>
+            </TableHead>
+            <TableBody>
+              {rows.map((r) => (
+                <TableRow key={r._id}>
+                  <TableCell>{r.attending ? 'Yes' : 'No'}</TableCell>
+                  <TableCell>{r.mealPreference}</TableCell>
+                  <TableCell>{r.allergies || '-'}</TableCell>
+                  <TableCell>{r.additionalNotes || '-'}</TableCell>
+                  <TableCell>{new Date(r.createdAt).toLocaleString()}</TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
   );
 };

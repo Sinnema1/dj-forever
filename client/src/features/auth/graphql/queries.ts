@@ -7,10 +7,12 @@ export const GET_ME = gql`
   query GetMe {
     me {
       _id
-      username
-      email
       fullName
+      email
       isAdmin
+      isInvited
+      hasRSVPed
+      rsvpId
     }
   }
 `;

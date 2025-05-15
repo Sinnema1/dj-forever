@@ -10,6 +10,7 @@ export interface UserDocument extends Document {
   fullName: string;
   email: string;
   password: string;
+  isAdmin: boolean;
   isCorrectPassword(password: string): Promise<boolean>;
   hasRSVPed: boolean;
   rsvpId?: Types.ObjectId | null;
@@ -38,6 +39,10 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       required: [true, "Password is required."],
       select: false,
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false,
     },
     hasRSVPed: {
       type: Boolean,

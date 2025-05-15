@@ -1,77 +1,44 @@
 import { gql } from '@apollo/client';
 
 /**
- * Create a new RSVP
+ * Submit an RSVP for the authenticated user
  */
-export const CREATE_RSVP = gql`
-  mutation CreateRSVP(
-    $fullName: String!
-    $email: String!
-    $attending: String!
-    $guests: Int
-    $notes: String
+export const SUBMIT_RSVP = gql`
+  mutation SubmitRSVP(
+    $attending: AttendanceStatus!
+    $mealPreference: String!
+    $allergies: String
+    $additionalNotes: String
   ) {
-    createRSVP(
-      input: {
-        fullName: $fullName
-        email: $email
-        attending: $attending
-        guests: $guests
-        notes: $notes
-      }
+    submitRSVP(
+      attending: $attending
+      mealPreference: $mealPreference
+      allergies: $allergies
+      additionalNotes: $additionalNotes
     ) {
       _id
-      fullName
-      email
       attending
-      guests
-      notes
+      mealPreference
+      allergies
+      additionalNotes
       createdAt
     }
   }
 `;
 
 /**
- * Update RSVP (optional if you allow edits)
+ * Edit an existing RSVP for the authenticated user
  */
-export const UPDATE_RSVP = gql`
-  mutation UpdateRSVP(
-    $id: ID!
-    $fullName: String
-    $email: String
-    $attending: String
-    $guests: Int
-    $notes: String
-  ) {
-    updateRSVP(
-      id: $id
-      input: {
-        fullName: $fullName
-        email: $email
-        attending: $attending
-        guests: $guests
-        notes: $notes
-      }
-    ) {
+export const EDIT_RSVP = gql`
+  mutation EditRSVP($updates: RSVPInput!) {
+    editRSVP(updates: $updates) {
       _id
-      fullName
-      email
       attending
-      guests
-      notes
+      mealPreference
+      allergies
+      additionalNotes
       createdAt
-    }
-  }
-`;
-
-/**
- * Delete RSVP (optional if you allow deletion)
- */
-export const DELETE_RSVP = gql`
-  mutation DeleteRSVP($id: ID!) {
-    deleteRSVP(id: $id) {
-      success
-      message
+      updatedAt
     }
   }
 `;

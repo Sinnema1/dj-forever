@@ -58,7 +58,10 @@ const Register = () => {
       await registerUser(formData.fullName, formData.email, formData.password);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Registration error:', error);
+      // Dev-only debug, no full error in prod
+      if (import.meta.env.DEV) {
+        console.debug('Registration error:', (error as Error).message);
+      }
       setErrorMsg((error as Error).message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);

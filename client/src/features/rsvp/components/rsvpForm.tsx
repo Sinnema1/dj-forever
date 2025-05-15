@@ -14,170 +14,111 @@ import {
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 import { useRSVP } from '../hooks/useRSVP';
+import { RSVPFormData, CreateRSVPInput } from '../types/rsvpTypes';
 
-/**
- * Form data structure for RSVP
- */
-interface RSVPFormData {
-  fullName: string;
-  email: string;
-  attending: string;
-  guests: number;
-  notes: string;
-}
-
-const RSVPForm = () => {
-  const { createRSVP, loading } = useRSVP();
+const RSVPForm: React.FC = () => {
+  const { submitRSVP, loading } = useRSVP();
 
   const [formData, setFormData] = useState<RSVPFormData>({
-    fullName: '',
-    email: '',
-    attending: '',
-    guests: 0,
-    notes: '',
+    attending: 'YES',
+    mealPreference: '',
+    allergies: '',
+    additionalNotes: '',
   });
-
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  /**
-   * Handles changes for text fields
-   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: name === 'guests' ? Number(value) : value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  /**
-   * Handles changes for select dropdowns
-   */
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
-
-    setFormData((prevData) => ({
-      ...prevData,
-      [name as keyof RSVPFormData]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name as keyof RSVPFormData]: value as any }));
   };
 
-  /**
-   * Handles form submission
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Basic validation
-    if (!formData.fullName || !formData.email || !formData.attending) {
-      setErrorMessage('Please fill out all required fields.');
+    if (!formData.attending || !formData.mealPreference) {
+      setErrorMessage('Please select your attendance and meal.');
       return;
     }
 
-    try {
-      await createRSVP(formData);
+    const input: CreateRSVPInput = {
+      attending: formData.attending,
+      mealPreference: formData.mealPreference,
+      allergies: formData.allergies || undefined,
+      additionalNotes: formData.additionalNotes || undefined,
+    };
 
-      setSuccessMessage('RSVP submitted successfully!');
+    try {
+      await submitRSVP(input);
+      setSuccessMessage('RSVP submitted!');
       setFormData({
-        fullName: '',
-        email: '',
-        attending: '',
-        guests: 0,
-        notes: '',
+        attending: 'YES',
+        mealPreference: '',
+        allergies: '',
+        additionalNotes: '',
       });
-    } catch (error: unknown) {
-      // Safely handle unknown errors
-      if (error instanceof Error) {
-        setErrorMessage(error.message || 'Something went wrong.');
-      } else {
-        setErrorMessage('An unknown error occurred.');
-      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Submission failed.';
+      setErrorMessage(msg);
     }
   };
 
-  /**
-   * Handles closing of snackbars
-   */
-  const handleCloseSnackbar = () => {
+  const handleClose = () => {
     setSuccessMessage('');
     setErrorMessage('');
   };
 
-  const isFormIncomplete = !formData.fullName || !formData.email || !formData.attending;
-
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        p: 3,
-        border: '1px solid',
-        borderColor: 'divider',
-        borderRadius: 2,
-        backgroundColor: 'background.paper',
-      }}
-    >
+    <Box component="form" onSubmit={handleSubmit} sx={{ p: 3, border: 1, borderRadius: 2 }}>
       <Typography variant="h6" gutterBottom>
         Submit RSVP
       </Typography>
 
-      {/* Full Name */}
-      <TextField
-        label="Full Name"
-        name="fullName"
-        value={formData.fullName}
-        onChange={handleInputChange}
-        fullWidth
-        required
-        margin="normal"
-        autoFocus
-      />
-
-      {/* Email */}
-      <TextField
-        label="Email"
-        name="email"
-        type="email"
-        value={formData.email}
-        onChange={handleInputChange}
-        fullWidth
-        required
-        margin="normal"
-      />
-
-      {/* Attending Select */}
       <FormControl fullWidth required margin="normal">
-        <InputLabel>Attending</InputLabel>
+        <InputLabel htmlFor="attending">Attending</InputLabel>
         <Select
+          id="attending"
           name="attending"
           value={formData.attending}
           onChange={handleSelectChange}
           label="Attending"
         >
-          <MenuItem value="yes">Yes</MenuItem>
-          <MenuItem value="no">No</MenuItem>
-          <MenuItem value="maybe">Maybe</MenuItem>
+          <MenuItem value="YES">Yes</MenuItem>
+          <MenuItem value="NO">No</MenuItem>
+          <MenuItem value="MAYBE">Maybe</MenuItem>
         </Select>
       </FormControl>
 
-      {/* Number of Guests */}
       <TextField
-        label="Guests"
-        name="guests"
-        type="number"
-        value={formData.guests}
+        id="mealPreference"
+        label="Meal Preference"
+        name="mealPreference"
+        value={formData.mealPreference}
+        onChange={handleInputChange}
+        fullWidth
+        required
+        margin="normal"
+      />
+
+      <TextField
+        id="allergies"
+        label="Allergies (optional)"
+        name="allergies"
+        value={formData.allergies}
         onChange={handleInputChange}
         fullWidth
         margin="normal"
       />
 
-      {/* Notes */}
       <TextField
-        label="Notes (optional)"
-        name="notes"
-        value={formData.notes}
+        id="additionalNotes"
+        label="Additional Notes (optional)"
+        name="additionalNotes"
+        value={formData.additionalNotes}
         onChange={handleInputChange}
         fullWidth
         multiline
@@ -185,35 +126,28 @@ const RSVPForm = () => {
         margin="normal"
       />
 
-      {/* Submit Button */}
       <Button
         type="submit"
         variant="contained"
         fullWidth
         sx={{ mt: 2 }}
-        disabled={loading || isFormIncomplete}
+        disabled={loading}
       >
-        {loading ? <CircularProgress size={24} /> : 'Submit RSVP'}
+        {loading ? <CircularProgress size={24} /> : 'Submit'}
       </Button>
 
-      {/* Snackbar for success or error messages */}
       <Snackbar
         open={!!successMessage || !!errorMessage}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
+        autoHideDuration={4000}
+        onClose={handleClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         {successMessage ? (
-          <Alert
-            onClose={handleCloseSnackbar}
-            severity="success"
-            sx={{ width: '100%' }}
-            role="alert"
-          >
+          <Alert severity="success" onClose={handleClose}>
             {successMessage}
           </Alert>
         ) : (
-          <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }} role="alert">
+          <Alert severity="error" onClose={handleClose}>
             {errorMessage}
           </Alert>
         )}

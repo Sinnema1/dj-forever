@@ -1,67 +1,65 @@
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_RSVPS } from '../graphql/queries';
-import { CREATE_RSVP } from '../graphql/mutations';
+import { GET_RSVP } from '../graphql/queries';
+import { SUBMIT_RSVP, EDIT_RSVP } from '../graphql/mutations';
 import { RSVP, CreateRSVPInput } from '../types/rsvpTypes';
 
-/**
- * Interface for GET_RSVPS GraphQL query response.
- */
-interface GetRSVPsResponse {
-  getRSVPs: RSVP[];
+/** Shape of the GET_RSVP response (single object) */
+interface GetRSVPResponse {
+  getRSVP: RSVP | null;
 }
 
-/**
- * Interface for CREATE_RSVP GraphQL mutation response.
- */
-interface CreateRSVPResponse {
-  createRSVP: RSVP;
+/** Shape of the submit RSVP mutation response */
+interface SubmitRSVPResponse {
+  submitRSVP: RSVP;
 }
 
-/**
- * Custom hook to manage RSVP logic: fetch RSVPs and create new RSVP.
- */
+/** Shape of the edit RSVP mutation response */
+interface EditRSVPResponse {
+  editRSVP: RSVP;
+}
+
 export const useRSVP = () => {
-  // Fetch RSVPs from backend
+  // Fetch the single RSVP
   const {
     data,
     loading: queryLoading,
     error: queryError,
     refetch,
-  } = useQuery<GetRSVPsResponse>(GET_RSVPS);
+  } = useQuery<GetRSVPResponse>(GET_RSVP);
 
-  // Mutation hook to create RSVP
-  const [executeCreateRSVP, { loading: mutationLoading, error: mutationError }] = useMutation<
-    CreateRSVPResponse,
-    { input: CreateRSVPInput }
-  >(CREATE_RSVP);
+  // Mutation hook to submit RSVP
+  const [executeSubmitRSVP, { loading: submitLoading, error: submitError }] =
+    useMutation<SubmitRSVPResponse, CreateRSVPInput>(SUBMIT_RSVP);
 
-  /**
-   * Create RSVP and refetch the RSVP list.
-   * @param formData - Data to create an RSVP (CreateRSVPInput)
-   */
-  const createRSVP = async (formData: CreateRSVPInput): Promise<void> => {
+  // Mutation hook to edit existing RSVP
+  const [executeEditRSVP, { loading: editLoading, error: editError }] =
+    useMutation<EditRSVPResponse, { updates: CreateRSVPInput }>(EDIT_RSVP);
+
+  const submitRSVP = async (input: CreateRSVPInput): Promise<void> => {
     try {
-      await executeCreateRSVP({
-        variables: { input: formData },
-      });
-
-      // Refetch RSVP list after creation
+      await executeSubmitRSVP({ variables: input });
       await refetch();
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error('Error creating RSVP:', error.message);
-        throw new Error(error.message);
-      } else {
-        console.error('Unknown error creating RSVP:', error);
-        throw new Error('An unknown error occurred while creating RSVP.');
-      }
+    } catch (err: unknown) {
+      console.debug('Error submitting RSVP:', (err as Error).message);
+      throw new Error((err as Error).message || 'Failed to submit RSVP');
+    }
+  };
+
+  const editRSVP = async (updates: CreateRSVPInput): Promise<void> => {
+    try {
+      await executeEditRSVP({ variables: { updates } });
+      await refetch();
+    } catch (err: unknown) {
+      console.debug('Error editing RSVP:', (err as Error).message);
+      throw new Error((err as Error).message || 'Failed to edit RSVP');
     }
   };
 
   return {
-    rsvps: data?.getRSVPs || [],
-    loading: queryLoading || mutationLoading,
-    error: queryError || mutationError,
-    createRSVP,
+    rsvp: data?.getRSVP ?? null,
+    loading: queryLoading || submitLoading || editLoading,
+    error: queryError || submitError || editError,
+    submitRSVP,
+    editRSVP,
   };
 };

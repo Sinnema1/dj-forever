@@ -1,28 +1,23 @@
 import client from '../../../apolloClient';
-import { CREATE_RSVP } from '../graphql/mutations';
-import { RSVP } from '../types/rsvpTypes';
+import { SUBMIT_RSVP } from '../graphql/mutations';
+import { RSVP, CreateRSVPInput } from '../types/rsvpTypes';
 
-export interface CreateRSVPInput {
-  fullName: string;
-  email: string;
-  attending: string; // e.g. "yes", "no", "maybe"
-  guests?: number;
-  notes?: string;
-}
-
+/**
+ * Submits an RSVP via GraphQL submitRSVP mutation
+ */
 export const submitRSVP = async (formData: CreateRSVPInput): Promise<RSVP> => {
   try {
-    const { data } = await client.mutate({
-      mutation: CREATE_RSVP,
-      variables: { input: formData },
+    const { data } = await client.mutate<{ submitRSVP: RSVP }>({
+      mutation: SUBMIT_RSVP,
+      variables: { ...formData },
     });
-    return data.createRSVP;
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error('RSVP submission error:', error.message);
-      throw new Error(error.message);
+    if (!data?.submitRSVP) {
+      throw new Error('No RSVP returned from server.');
     }
-    console.error('Unknown error creating RSVP:', error);
-    throw new Error('An unknown error occurred while creating RSVP.');
+    return data.submitRSVP;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error submitting RSVP';
+    console.error('RSVP submission error:', message);
+    throw new Error(message);
   }
 };

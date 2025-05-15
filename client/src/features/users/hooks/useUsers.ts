@@ -1,34 +1,42 @@
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_USERS, GET_USER_BY_ID } from '../graphql/queries';
+import {
+  GET_ME,
+  GET_USERS,
+  GET_USER_BY_ID,
+} from '../graphql/queries';
 import { UPDATE_USER, DELETE_USER } from '../graphql/mutations';
-import { UserType, UpdateUserInput } from '../types/userTypes';
+import {
+  UserType,
+  UpdateUserInput,
+} from '../types/userTypes';
 
-interface GetUsersResponse {
-  getUsers: UserType[];
-}
+interface MeResponse { me: UserType }
+interface GetUsersResponse { getUsers: UserType[] }
+interface GetUserByIdResponse { getUserById: UserType }
+interface UpdateUserResponse { updateUser: UserType }
+interface DeleteUserResponse { deleteUser: { _id: string } }
 
-interface GetUserByIdResponse {
-  getUserById: UserType;
-}
+export const useMe = () => {
+  const { data, loading, error, refetch } = useQuery<MeResponse>(GET_ME);
+  return {
+    user: data?.me ?? null,
+    loading,
+    error,
+    refetch,
+  };
+};
 
-interface UpdateUserResponse {
-  updateUser: UserType;
-}
-
-interface DeleteUserResponse {
-  deleteUser: { _id: string };
-}
-
+/** Admin‐only list + self‐by‐id */
 export const useUsers = (userId?: string) => {
-  // Fetch all users (for admin views)
   const {
     data: allUsersData,
     loading: usersLoading,
     error: usersError,
     refetch: refetchUsers,
-  } = useQuery<GetUsersResponse>(GET_USERS);
+  } = useQuery<GetUsersResponse>(GET_USERS, {
+    skip: !userId, // skip unless we have an id to check admin on server
+  });
 
-  // Fetch a single user by ID (for profile views)
   const {
     data: userByIdData,
     loading: userLoading,
@@ -39,33 +47,21 @@ export const useUsers = (userId?: string) => {
     variables: { id: userId },
   });
 
-  // Mutation to update a user
   const [updateUserMutation] = useMutation<
     UpdateUserResponse,
     { id: string; input: UpdateUserInput }
   >(UPDATE_USER);
+  const [deleteUserMutation] = useMutation<
+    DeleteUserResponse,
+    { id: string }
+  >(DELETE_USER);
 
-  // Mutation to delete a user
-  const [deleteUserMutation] = useMutation<DeleteUserResponse, { id: string }>(DELETE_USER);
-
-  /**
-   * Updates the user and refetches the latest profile data.
-   * @param id - The user ID to update.
-   * @param input - The updated user information.
-   */
-  const updateUser = async (id: string, input: UpdateUserInput): Promise<void> => {
+  const updateUser = async (id: string, input: UpdateUserInput) => {
     await updateUserMutation({ variables: { id, input } });
-    // Explicitly check before calling refetchUser to satisfy ESLint
-    if (refetchUser) {
-      refetchUser();
-    }
+    refetchUser?.();
   };
 
-  /**
-   * Deletes a user and refetches the user list.
-   * @param id - The user ID to delete.
-   */
-  const deleteUser = async (id: string): Promise<void> => {
+  const deleteUser = async (id: string) => {
     await deleteUserMutation({ variables: { id } });
     refetchUsers();
   };

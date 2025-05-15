@@ -17,89 +17,65 @@ import { SelectChangeEvent } from '@mui/material/Select';
 import { useRSVP } from '../hooks/useRSVP';
 import { RSVPFormData } from '../types/rsvpTypes';
 
-/**
- * RSVPForm component renders the RSVP submission form.
- */
-const RSVPForm: React.FC = () => {
-  // Get the createRSVP function and loading state from the custom useRSVP hook.
-  const { createRSVP, loading } = useRSVP();
+const RSVPFormPage: React.FC = () => {
+  // use the updated hook method name
+  const { submitRSVP, loading } = useRSVP();
 
-  // Local state for the RSVP form data, typed with RSVPFormData.
+  // Initialize with valid defaults
   const [formData, setFormData] = useState<RSVPFormData>({
-    fullName: '',
-    email: '',
-    attending: '',
-    guests: 0,
-    notes: '',
+    attending: 'YES',
+    mealPreference: '',
+    allergies: '',
+    additionalNotes: '',
   });
 
-  // Local state for feedback messages.
-  const [successMessage, setSuccessMessage] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  /**
-   * Updates formData when a text field changes.
-   * Converts "guests" input to a number.
-   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      // If the field is 'guests', convert the value to a number
-      [name]: name === 'guests' ? Number(value) : value,
+      [name]: value,
     }));
   };
 
-  /**
-   * Updates formData when the Select field changes.
-   */
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      [name as keyof RSVPFormData]: value,
+      [name as keyof RSVPFormData]: value as any,
     }));
   };
 
-  /**
-   * Handles the form submission.
-   * Validates the required fields and calls createRSVP mutation.
-   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Basic form validation
-    if (!formData.fullName || !formData.email || !formData.attending) {
-      setErrorMessage('Please fill out all required fields.');
+    // Basic validation
+    if (!formData.attending || !formData.mealPreference) {
+      setErrorMessage('Please select your attendance and meal.');
       return;
     }
-
     try {
-      // Submit the RSVP data.
-      await createRSVP({
-        ...formData,
-        guests: Number(formData.guests), // ensure guests is a number
+      // Pass exactly the fields your mutation expects
+      await submitRSVP({
+        attending: formData.attending,
+        mealPreference: formData.mealPreference,
+        allergies: formData.allergies || undefined,
+        additionalNotes: formData.additionalNotes || undefined,
       });
-      // On success, show a success message and reset the form.
       setSuccessMessage('RSVP submitted successfully!');
       setFormData({
-        fullName: '',
-        email: '',
-        attending: '',
-        guests: 0,
-        notes: '',
+        attending: 'YES',
+        mealPreference: '',
+        allergies: '',
+        additionalNotes: '',
       });
-    } catch (error: unknown) {
-      // Safely narrow the error type.
-      const errMsg =
-        error instanceof Error ? error.message : 'Something went wrong. Please try again.';
-      setErrorMessage(errMsg);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Submission failed.';
+      setErrorMessage(msg);
     }
   };
 
-  /**
-   * Closes any open snackbar messages.
-   */
   const handleCloseSnackbar = () => {
     setSuccessMessage('');
     setErrorMessage('');
@@ -107,114 +83,93 @@ const RSVPForm: React.FC = () => {
 
   return (
     <Container maxWidth="sm">
-      {/* Page Title */}
-      <Typography variant="h4" gutterBottom align="center">
-        RSVP Form
+      <Typography variant="h4" align="center" gutterBottom>
+        RSVP
       </Typography>
 
-      {/* Form Container */}
       <Box
         component="form"
         onSubmit={handleSubmit}
-        noValidate
-        sx={{
-          mt: 2,
-          p: 3,
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
-          backgroundColor: 'background.paper',
-        }}
+        sx={{ mt: 2, p: 3, border: 1, borderRadius: 2 }}
       >
-        {/* Full Name Field */}
-        <TextField
-          label="Full Name"
-          name="fullName"
-          value={formData.fullName}
-          onChange={handleInputChange}
-          fullWidth
-          required
-          margin="normal"
-          autoFocus
-        />
-
-        {/* Email Field */}
-        <TextField
-          label="Email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          fullWidth
-          required
-          margin="normal"
-        />
-
-        {/* Attending Select Field */}
         <FormControl fullWidth required margin="normal">
           <InputLabel id="attending-label">Attending?</InputLabel>
           <Select
             labelId="attending-label"
+            id="attending"
             name="attending"
             value={formData.attending}
             onChange={handleSelectChange}
             label="Attending?"
           >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
-            <MenuItem value="maybe">Maybe</MenuItem>
+            <MenuItem value="YES">Yes</MenuItem>
+            <MenuItem value="NO">No</MenuItem>
+            <MenuItem value="MAYBE">Maybe</MenuItem>
           </Select>
         </FormControl>
 
-        {/* Number of Guests Field */}
         <TextField
-          label="Number of Guests"
-          name="guests"
-          type="number"
-          value={formData.guests}
+          id="mealPreference"
+          label="Meal Preference"
+          name="mealPreference"
+          value={formData.mealPreference}
+          onChange={handleInputChange}
+          fullWidth
+          required
+          margin="normal"
+        />
+
+        <TextField
+          id="allergies"
+          label="Allergies (optional)"
+          name="allergies"
+          value={formData.allergies}
           onChange={handleInputChange}
           fullWidth
           margin="normal"
         />
 
-        {/* Notes Field */}
         <TextField
-          label="Notes (optional)"
-          name="notes"
+          id="additionalNotes"
+          label="Additional Notes (optional)"
+          name="additionalNotes"
+          value={formData.additionalNotes}
+          onChange={handleInputChange}
+          fullWidth
           multiline
-          rows={4}
-          value={formData.notes}
-          onChange={handleInputChange}
-          fullWidth
+          rows={3}
           margin="normal"
         />
 
-        {/* Submit Button */}
-        <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={loading}>
+        <Button
+          type="submit"
+          variant="contained"
+          fullWidth
+          sx={{ mt: 2 }}
+          disabled={loading}
+        >
           {loading ? <CircularProgress size={24} /> : 'Submit RSVP'}
         </Button>
       </Box>
 
-      {/* Success Snackbar */}
       <Snackbar
         open={!!successMessage}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }} role="alert">
+        <Alert severity="success" onClose={handleCloseSnackbar}>
           {successMessage}
         </Alert>
       </Snackbar>
 
-      {/* Error Snackbar */}
       <Snackbar
         open={!!errorMessage}
         autoHideDuration={4000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }} role="alert">
+        <Alert severity="error" onClose={handleCloseSnackbar}>
           {errorMessage}
         </Alert>
       </Snackbar>
@@ -222,4 +177,4 @@ const RSVPForm: React.FC = () => {
   );
 };
 
-export default RSVPForm;
+export default RSVPFormPage;

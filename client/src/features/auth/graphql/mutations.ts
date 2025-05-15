@@ -9,6 +9,7 @@ export const LOGIN_USER = gql`
         fullName
         email
         isInvited
+        hasRSVPed
       }
     }
   }
@@ -23,6 +24,7 @@ export const REGISTER_USER = gql`
         fullName
         email
         isInvited
+        hasRSVPed
       }
     }
   }

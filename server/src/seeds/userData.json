@@ -5,28 +5,32 @@
       "email": "alice@example.com",
       "password": "SecurePass123!",
       "isInvited": true,
-      "hasRSVPed": true
+      "hasRSVPed": true,
+      "isAdmin": false 
     },
     {
       "fullName": "Bob Smith",
       "email": "bob@example.com",
       "password": "SecurePass456!",
       "isInvited": true,
-      "hasRSVPed": true
+      "hasRSVPed": true,
+      "isAdmin": false
     },
     {
       "fullName": "Charlie Williams",
       "email": "charlie@example.com",
       "password": "SecurePass789!",
       "isInvited": false,
-      "hasRSVPed": false
+      "hasRSVPed": false,
+      "isAdmin": false
     },
     {
       "fullName": "Diana Brown",
       "email": "diana@example.com",
       "password": "SecurePassABC!",
       "isInvited": true,
-      "hasRSVPed": true
+      "hasRSVPed": true,
+      "isAdmin": false
     }
   ]
 }

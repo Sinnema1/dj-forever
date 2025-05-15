@@ -1,203 +1,169 @@
 import {
   getUserById,
+  getAllUsers,
   createUser,
   authenticateUser,
+  updateUser,
 } from "../services/userService.js";
-
-import invitedEmails from '../config/invitedList.js';
-
-import { submitRSVP, getRSVP, editRSVP } from "../services/rsvpService.js";
-
+import invitedEmails from "../config/invitedList.js";
+import {
+  submitRSVP as submitRSVPService,
+  getRSVP as fetchRSVP,
+  editRSVP as updateRSVPService,
+} from "../services/rsvpService.js";
 import { createError } from "../middleware/errorHandler.js";
 
-/**
- * Defines input fields for user registration.
- */
-interface UserInput {
-  fullName: string;
-  email: string;
-  password: string;
-}
-
-/**
- * Defines input fields for user login.
- */
-interface LoginInput {
-  email: string;
-  password: string;
-}
-
-/**
- * Defines input fields for RSVP submission.
- */
+/** Exact shape of the GraphQL RSVPInput */
 interface RSVPInput {
-  attending: boolean;
+  attending: "YES" | "NO" /* | "MAYBE" */;
   mealPreference: string;
   allergies?: string;
   additionalNotes?: string;
 }
 
-/**
- * Defines the GraphQL context, which includes authenticated user data.
- */
+/** Context.user now includes both _id and email and isAdmin if you want role checks */
 interface Context {
   user?: {
     _id: string;
-    // Optionally, if available, include email here so you can avoid an extra DB call:
-    // email: string;
+    email: string;
+    isAdmin?: boolean;
   };
 }
 
 const resolvers = {
   Query: {
-    /**
-     * Retrieves the currently authenticated user's profile.
-     * @returns {Promise<UserType>} Authenticated user data.
-     */
-    me: async (_parent: any, _args: any, context: Context) => {
-      try {
-        if (!context.user)
-          throw createError("Authentication required.", 401);
-
-        return await getUserById(context.user._id);
-      } catch (error: any) {
-        if (error.statusCode) throw error; // Pass through known errors
-        throw createError(`Failed to retrieve user: ${error.message}`, 500);
-      }
+    me: async (_p: any, _args: any, ctx: Context) => {
+      if (!ctx.user) throw createError("Authentication required.", 401);
+      return await getUserById(ctx.user._id);
     },
 
-    /**
-     * Retrieves the RSVP for the authenticated user.
-     * @returns {Promise<RSVP>} The RSVP details.
-     */
-    getRSVP: async (_parent: any, _args: any, context: Context) => {
-      try {
-        if (!context.user)
-          throw createError("Authentication required.", 401);
+    getUsers: async (_p: any, _args: any, ctx: Context) => {
+      if (!ctx.user) throw createError("Authentication required.", 401);
+      if (!ctx.user.isAdmin) throw createError("Admin access required.", 403);
+      return await getAllUsers();
+    },
 
-        const rsvp = await getRSVP(context.user._id);
-        if (!rsvp)
-          throw createError("No existing RSVP found for this user.", 404);
-
-        return rsvp;
-      } catch (error: any) {
-        if (error.statusCode) throw error;
-        throw createError(`Failed to retrieve RSVP: ${error.message}`, 500);
+    getUserById: async (_p: any, { id }: { id: string }, ctx: Context) => {
+      if (!ctx.user) throw createError("Authentication required.", 401);
+      // non-admins only get their own record
+      if (!ctx.user.isAdmin && ctx.user._id !== id) {
+        throw createError("You can only view your own profile.", 403);
       }
+      return await getUserById(id);
+    },
+
+    getRSVP: async (_p: any, _args: any, ctx: Context) => {
+      if (!ctx.user) throw createError("Authentication required.", 401);
+      const rsvp = await fetchRSVP(ctx.user._id);
+      if (!rsvp) throw createError("No existing RSVP found.", 404);
+      return rsvp;
     },
   },
 
   Mutation: {
-    /**
-     * Registers a new user and returns an authentication token.
-     * @returns {Promise<{ token: string; user: UserType }>} Authentication token and user details.
-     */
-    registerUser: async (_parent: any, { fullName, email, password }: UserInput) => {
-      try {
-        return await createUser(fullName, email, password);
-      } catch (error: any) {
-        if (error.statusCode) throw error;
-        throw createError(`User registration failed: ${error.message}`, 400);
-      }
-    },
+    registerUser: (_p: any, args: any) =>
+      createUser(args.fullName, args.email, args.password),
+
+    loginUser: (_p: any, args: any) =>
+      authenticateUser(args.email, args.password),
 
     /**
-     * Authenticates a user and returns a JWT token.
-     * @returns {Promise<{ token: string; user: UserType }>} Authentication token and user details.
+     * updateUser:
+     * - Admins can update any user.
+     * - Non-admins only themselves.
      */
-    loginUser: async (_parent: any, { email, password }: LoginInput) => {
-      try {
-        return await authenticateUser(email, password);
-      } catch (error: any) {
-        if (error.statusCode) throw error;
-        throw createError(`Authentication failed: ${error.message}`, 401);
+    updateUser: async (
+      _p: any,
+      {
+        id,
+        input,
+      }: { id: string; input: { fullName?: string; email?: string } },
+      ctx: Context
+    ) => {
+      if (!ctx.user) throw createError("Authentication required.", 401);
+      // only admins or the user themself may update
+      if (!ctx.user.isAdmin && ctx.user._id !== id) {
+        throw createError("You can only update your own profile.", 403);
       }
+      return await updateUser(id, input);
     },
 
-    /**
-     * Submits an RSVP for the authenticated user.
-     * Ensures that only invited users can submit an RSVP and prevents duplicate submissions.
-     * @returns {Promise<RSVP>} The submitted RSVP details.
-     */
     submitRSVP: async (
-      _parent: any,
+      _p: any,
       { attending, mealPreference, allergies, additionalNotes }: RSVPInput,
-      context: Context
+      ctx: Context
     ) => {
-      try {
-        // Ensure the user is authenticated.
-        if (!context.user)
-          throw createError("Authentication required.", 401);
+      if (!ctx.user) throw createError("Authentication required.", 401);
 
-        // Retrieve the current user details to check email against the invited list.
-        const currentUser = await getUserById(context.user._id);
-        if (!currentUser || !invitedEmails.includes(currentUser.email)) {
-          throw createError("You are not invited to RSVP.", 403);
-        }
-
-        // Prevent duplicate RSVPs.
-        const existingRSVP = await getRSVP(context.user._id);
-        if (existingRSVP)
-          throw createError("User has already submitted an RSVP.", 400);
-
-        // Call the service function to create the RSVP.
-        return await submitRSVP(
-          context.user._id,
-          attending,
-          mealPreference,
-          allergies,
-          additionalNotes
-        );
-      } catch (error: any) {
-        if (error.statusCode) throw error;
-        throw createError(`RSVP submission failed: ${error.message}`, 400);
+      // we already have ctx.user.email
+      if (!invitedEmails.includes(ctx.user.email)) {
+        throw createError("You are not invited to RSVP.", 403);
       }
+
+      // Prevent duplicates
+      if (await fetchRSVP(ctx.user._id)) {
+        throw createError("User has already submitted an RSVP.", 400);
+      }
+
+      // Map the enum back to a boolean
+      const attendingBool = attending === "YES";
+      return await submitRSVPService(
+        ctx.user._id,
+        attendingBool,
+        mealPreference,
+        allergies,
+        additionalNotes
+      );
     },
 
-    /**
-     * Updates an existing RSVP for the authenticated user.
-     * Ensures the RSVP exists before updating.
-     * @returns {Promise<RSVP>} The updated RSVP details.
-     */
     editRSVP: async (
-      _parent: any,
+      _p: any,
       { updates }: { updates: RSVPInput },
-      context: Context
+      ctx: Context
     ) => {
-      try {
-        if (!context.user)
-          throw createError("Authentication required.", 401);
+      if (!ctx.user) throw createError("Authentication required.", 401);
 
-        const existingRSVP = await getRSVP(context.user._id);
-        if (!existingRSVP)
-          throw createError("No existing RSVP found for this user.", 404);
+      const existing = await fetchRSVP(ctx.user._id);
+      if (!existing) throw createError("No existing RSVP found.", 404);
 
-        return await editRSVP(context.user._id, updates);
-      } catch (error: any) {
-        if (error.statusCode) throw error;
-        throw createError(`RSVP update failed: ${error.message}`, 400);
+      const attendingBool = updates.attending === "YES";
+      const updatePayload: {
+        attending: boolean;
+        mealPreference: string;
+        allergies?: string;
+        additionalNotes?: string;
+      } = { attending: attendingBool, mealPreference: updates.mealPreference };
+
+      if (updates.allergies !== undefined) {
+        updatePayload.allergies = updates.allergies;
       }
+      if (updates.additionalNotes !== undefined) {
+        updatePayload.additionalNotes = updates.additionalNotes;
+      }
+
+      return await updateRSVPService(ctx.user._id, updatePayload);
     },
   },
 
-  /**
-   * Field resolvers for the User type.
-   * Handles nested or computed fields that are not directly available in the User model.
-   */
   User: {
-    rsvp: async (parent: any) => {
-      try {
-        // If the user doesn't have an RSVP ID, return null.
-        if (!parent.rsvpId) return null;
-
-        // Optionally, if your model links RSVP by user ID, adjust this call accordingly.
-        const rsvp = await getRSVP(parent._id);
-        return rsvp;
-      } catch (error: any) {
-        if (error.statusCode) throw error;
-        throw createError(`Failed to load RSVP: ${error.message}`, 500);
-      }
+    // ensure rsvpId is serialized as a string ID
+    rsvpId: (parent: any) => {
+      if (!parent.rsvpId) return null;
+      return typeof parent.rsvpId === "string"
+        ? parent.rsvpId
+        : parent.rsvpId._id?.toString();
     },
+
+    // resolve the `rsvp` field when requested
+    rsvp: async (parent: any) => {
+      if (!parent.rsvpId) return null;
+      return await fetchRSVP(parent._id);
+    },
+  },
+
+  RSVP: {
+    // boolean → enum mapping for GraphQL
+    attending: (parent: any) => (parent.attending ? "YES" : "NO"),
   },
 };
 

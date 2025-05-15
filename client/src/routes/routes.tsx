@@ -1,5 +1,6 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 // Layout
 import AppLayout from '../components/layout/AppLayout';
@@ -18,30 +19,54 @@ import RSVP from '../features/rsvp/pages/RSVP';
 import Dashboard from '../features/dashboard/pages/Dashboard';
 
 // Components
-import PrivateRoute from '../components/PrivateRoute';
+import PrivateRoute from './PrivateRoute';
+import PublicRoute from './PublicRoute';
 
 /**
  * AppRoutes defines all routes and applies the AppLayout as a wrapper.
  */
 const AppRoutes = () => {
+  const { user, isLoggedIn } = useAuth();
+
   return (
     <Routes>
-      {/* Wrap all routes with AppLayout */}
       <Route path="/" element={<AppLayout />}>
-        {/* Public Routes */}
-        <Route index element={<Home />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+        {/* Public: only for NOT logged-in */}
+        <Route
+          path="login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
 
-        {/* Protected Routes */}
+        {/* Home is always visible */}
+        <Route index element={<Home />} />
+
+        {/* Protected: must be logged in */}
         <Route
           path="dashboard"
           element={
             <PrivateRoute>
-              <Dashboard />
+              {/* RSVP guard: if not RSVPed, force to /rsvp */}
+              {user?.hasRSVPed ? (
+                <Dashboard />
+              ) : (
+                <Navigate to="/rsvp" replace />
+              )}
             </PrivateRoute>
           }
         />
+
         <Route
           path="profile"
           element={
@@ -50,16 +75,22 @@ const AppRoutes = () => {
             </PrivateRoute>
           }
         />
+
         <Route
           path="rsvp"
           element={
             <PrivateRoute>
-              <RSVP />
+              {/* If already RSVPed, bounce to dashboard */}
+              {user?.hasRSVPed ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <RSVP />
+              )}
             </PrivateRoute>
           }
         />
 
-        {/* Catch-all route for undefined paths */}
+        {/* Fallback */}
         <Route path="*" element={<ErrorPage />} />
       </Route>
     </Routes>

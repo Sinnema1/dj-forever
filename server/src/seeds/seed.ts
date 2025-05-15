@@ -1,71 +1,111 @@
 import bcrypt from "bcrypt";
 import mongoose from "mongoose";
+import fs from "fs/promises";
 import User from "../models/User.js";
 import RSVP from "../models/RSVP.js";
-import fs from "fs";
 import { createError } from "../middleware/errorHandler.js";
 
-/**
- * Seeds the database with user and RSVP data.
- * Ensures correct user-RSVP relationships.
- */
 export const seedDatabase = async () => {
   try {
-    console.log("🚀 Starting database seeding...");
+    console.log("🚀  Seeding database…");
 
-    // Read and parse user & RSVP data from JSON files
-    const userData = JSON.parse(fs.readFileSync("./src/seeds/userData.json", "utf-8"));
-    const rsvpData = JSON.parse(fs.readFileSync("./src/seeds/rsvpData.json", "utf-8"));
+    // Load JSON fixtures
+    const userJson = JSON.parse(
+      await fs.readFile("./src/seeds/userData.json", "utf8")
+    );
+    const rsvpJson = JSON.parse(
+      await fs.readFile("./src/seeds/rsvpData.json", "utf8")
+    );
 
-    // ✅ Hash passwords before inserting users and explicitly map all required fields
-    const usersWithHashedPasswords = await Promise.all(
-      userData.users.map(async (user: any) => ({
-        fullName: user.fullName,
-        email: user.email,
-        password: await bcrypt.hash(user.password, 10),
-        isInvited: user.isInvited,   // explicitly include isInvited
-        hasRSVPed: user.hasRSVPed      // explicitly include hasRSVPed
+    /* -------- USERS -------- */
+    const usersToInsert = await Promise.all(
+      userJson.users.map(async (u: any) => ({
+        fullName: u.fullName,
+        email: u.email,
+        password: await bcrypt.hash(u.password, 10),
+        isInvited: u.isInvited === true,
+        hasRSVPed: !!u.hasRSVPed,
+        isAdmin: u.isAdmin === true,
       }))
     );
 
-    console.log("Processed Users:", usersWithHashedPasswords);
+    console.log(`• Prepared ${usersToInsert.length} users`);
 
-    // ✅ Insert users and retrieve their new IDs (MongoDB generates valid ObjectIds)
-    const insertedUsers = await User.insertMany(usersWithHashedPasswords);
-    console.log(`✅ Inserted ${insertedUsers.length} users.`);
+    const insertedUsers = await User.insertMany(usersToInsert);
+    console.log(`✅ Inserted ${insertedUsers.length} users`);
 
-    // ✅ Create a user lookup (email → ObjectId)
-    const userMap = new Map(insertedUsers.map((user) => [user.email, user._id]));
+    // Build email → ObjectId map
+    const userMap = new Map(insertedUsers.map((u) => [u.email, u._id]));
 
-    // ✅ Validate & map RSVPs with correct userIds
-    const rsvpsWithUserIds = rsvpData.rsvps
-      .map((rsvp: any) => {
-        const userId = userMap.get(rsvp.userEmail); // Map email → ObjectId
+    /* -------- RSVPs -------- */
+    interface RSVPJson {
+      userEmail: string;
+      attending: string | boolean;
+      mealPreference?: string;
+      allergies?: string;
+      additionalNotes?: string;
+    }
+
+    interface RSVPInsert {
+      userId: mongoose.Types.ObjectId;
+      attending: boolean;
+      mealPreference: string;
+      allergies: string;
+      additionalNotes: string;
+    }
+
+    interface RsvpJsonData {
+      rsvps: RSVPJson[];
+    }
+
+    const rsvpsToInsert: RSVPInsert[] = (rsvpJson as RsvpJsonData).rsvps
+      .map((r: RSVPJson): RSVPInsert | null => {
+        const userId: mongoose.Types.ObjectId | undefined = userMap.get(
+          r.userEmail
+        );
         if (!userId) {
-          console.warn(`⚠️ No matching user found for RSVP: ${rsvp.userEmail}`);
+          console.warn(`⚠️  No matching user for RSVP: ${r.userEmail}`);
           return null;
         }
-        return { ...rsvp, userId };
+        // Normalize attending to boolean
+        let attendingBool: boolean;
+        if (typeof r.attending === "string") {
+          attendingBool = r.attending.toUpperCase() === "YES";
+        } else {
+          attendingBool = Boolean(r.attending);
+        }
+        return {
+          userId,
+          attending: attendingBool,
+          mealPreference: r.mealPreference || "",
+          allergies: r.allergies || "",
+          additionalNotes: r.additionalNotes || "",
+        };
       })
-      .filter(Boolean); // Remove invalid RSVP entries
+      .filter((x): x is NonNullable<typeof x> => Boolean(x));
 
-    // ✅ Insert RSVPs into the database
-    if (rsvpsWithUserIds.length > 0) {
-      const insertedRSVPs = await RSVP.insertMany(rsvpsWithUserIds);
-      console.log(`✅ Inserted ${insertedRSVPs.length} RSVPs.`);
+    if (rsvpsToInsert.length) {
+      const insertedRSVPs = await RSVP.insertMany(rsvpsToInsert);
+      console.log(`✅ Inserted ${insertedRSVPs.length} RSVPs`);
 
-      // ✅ Update users with their RSVP references
-      for (const rsvp of insertedRSVPs) {
-        await User.findByIdAndUpdate(rsvp.userId, { rsvpId: rsvp._id, hasRSVPed: true });
-      }
-      console.log("🎉 Database seeding completed successfully!");
+      // Back‑reference users
+      await Promise.all(
+        insertedRSVPs.map((r) =>
+          User.findByIdAndUpdate(r.userId, {
+            rsvpId: r._id,
+            hasRSVPed: true,
+          })
+        )
+      );
+      console.log("🎉  Seeding complete");
     } else {
-      console.warn("⚠️ No RSVPs were inserted. Check RSVP data.");
+      console.warn("⚠️  No RSVPs inserted");
     }
-  } catch (error) {
-    console.error("❌ Error seeding the database:", error);
+  } catch (err: any) {
+    console.error("❌  Seed error:", err);
     throw createError("Failed to seed the database.", 500);
   } finally {
-    mongoose.connection.close();
+    await mongoose.connection.close();
+    console.log("Database connection closed.");
   }
 };

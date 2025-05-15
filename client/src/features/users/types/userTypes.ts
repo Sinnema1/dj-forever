@@ -5,8 +5,9 @@ export interface UserType {
   _id: string;
   fullName: string;
   email: string;
-  isAdmin?: boolean; // Optional: used if admin roles are supported
+  isAdmin?: boolean;
   isInvited: boolean;
+  hasRSVPed: boolean;
 }
 
 /**
@@ -27,16 +28,14 @@ export interface CreateUserInput {
   fullName: string;
   email: string;
   password: string;
-  username?: string; // Optional: include if usernames are implemented
 }
 
 /**
  * Input type for updating an existing user.
  */
 export interface UpdateUserInput {
-  _id: string; // ID of the user to update (required)
+  _id: string;
   fullName?: string;
   email?: string;
-  username?: string;
   password?: string;
 }

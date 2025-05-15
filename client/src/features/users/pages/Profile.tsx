@@ -1,58 +1,66 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
-import { Container, TextField, Button, Typography, CircularProgress, Alert } from '@mui/material';
+import {
+  Container,
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+  Alert,
+} from '@mui/material';
 import { GET_ME } from '../../auth/graphql/queries';
 import { UPDATE_USER } from '../graphql/mutations';
 
-// Optional TypeScript interface for response
 interface MeResponse {
   me: {
     _id: string;
-    username: string;
+    fullName: string;
     email: string;
+    isAdmin: boolean;
+    isInvited: boolean;
+    hasRSVPed: boolean;
+    rsvpId?: string | null;
   };
 }
 
-const Profile = () => {
+const Profile: React.FC = () => {
   const { loading, data, refetch } = useQuery<MeResponse>(GET_ME);
-  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const [updateUser, { loading: updating }] = useMutation(UPDATE_USER, {
-    onCompleted: () => {
-      setSuccessMessage('✅ Account updated successfully!');
-      refetch();
-    },
-    onError: (error) => {
-      setErrorMessage(`❌ Error: ${error.message}`);
-    },
-  });
+  const [updateUser, { loading: updating }] =
+    useMutation(UPDATE_USER, {
+      onCompleted: () => {
+        setSuccessMessage('✅ Account updated successfully!');
+        refetch();
+      },
+      onError: ({ message }) => {
+        setErrorMessage(`❌ Error: ${message}`);
+      },
+    });
 
-  // Sync data to form inputs
   useEffect(() => {
     if (data?.me) {
-      setUsername(data.me.username);
+      setFullName(data.me.fullName);
       setEmail(data.me.email);
     }
   }, [data]);
 
   const handleUpdate = async () => {
-    try {
-      setSuccessMessage('');
-      setErrorMessage('');
+    setSuccessMessage('');
+    setErrorMessage('');
 
-      await updateUser({
-        variables: {
-          // Confirm your mutation input here!
-          username,
+    await updateUser({
+      variables: {
+        id: data!.me._id,
+        input: {
+          fullName,
           email,
         },
-      });
-    } catch (err) {
-      console.error('Error updating account:', err);
-    }
+      },
+    });
   };
 
   if (loading) {
@@ -63,10 +71,10 @@ const Profile = () => {
     );
   }
 
-  const isFormIncomplete = !username || !email;
+  const isFormIncomplete = !fullName || !email;
 
   return (
-    <Container maxWidth="sm" sx={{ textAlign: 'center', marginTop: '50px' }}>
+    <Container maxWidth="sm" sx={{ textAlign: 'center', mt: 8 }}>
       <Typography variant="h4" gutterBottom>
         My Account
       </Typography>
@@ -76,10 +84,10 @@ const Profile = () => {
 
       <TextField
         fullWidth
-        label="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        sx={{ marginBottom: 3 }}
+        label="Full Name"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+        sx={{ mb: 3 }}
       />
       <TextField
         fullWidth
@@ -87,19 +95,11 @@ const Profile = () => {
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        sx={{ marginBottom: 3 }}
+        sx={{ mb: 3 }}
       />
 
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {successMessage}
-        </Alert>
-      )}
-      {errorMessage && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {errorMessage}
-        </Alert>
-      )}
+      {successMessage && <Alert severity="success" sx={{ mb: 2 }}>{successMessage}</Alert>}
+      {errorMessage && <Alert severity="error" sx={{ mb: 2 }}>{errorMessage}</Alert>}
 
       <Button
         variant="contained"

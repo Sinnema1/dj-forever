@@ -1,9 +1,6 @@
 import { gql } from "graphql-tag";
 
-/**
- * GraphQL Type Definitions for User, RSVP, Queries, and Mutations.
- */
-const typeDefs = gql`
+export default gql`
   """
   Enum representing the RSVP attendance status.
   """
@@ -37,7 +34,7 @@ const typeDefs = gql`
     mealPreference: String!
     allergies: String
     additionalNotes: String
-    createdAt: String! # Consider using a custom scalar (e.g. DateTime) if needed
+    createdAt: String!
   }
 
   """
@@ -51,8 +48,13 @@ const typeDefs = gql`
   }
 
   """
-  Query type for fetching user and RSVP details.
+  Input type for updating an existing user.
   """
+  input UpdateUserInput {
+    fullName: String
+    email: String
+  }
+
   type Query {
     """
     Retrieves the currently authenticated user's profile.
@@ -60,23 +62,26 @@ const typeDefs = gql`
     me: User
 
     """
+    Retrieves all users (admin only).
+    """
+    getUsers: [User!]!
+
+    """
+    Retrieves a user by ID (admin or self).
+    """
+    getUserById(id: ID!): User
+
+    """
     Retrieves the RSVP of the authenticated user.
     """
     getRSVP: RSVP
   }
 
-  """
-  Mutation type for authentication and RSVP management.
-  """
   type Mutation {
     """
     Registers a new user and returns an authentication token.
     """
-    registerUser(
-      fullName: String!
-      email: String!
-      password: String!
-    ): AuthPayload
+    registerUser(fullName: String!, email: String!, password: String!): AuthPayload
 
     """
     Authenticates a user and returns a JWT token.
@@ -97,6 +102,11 @@ const typeDefs = gql`
     Updates an existing RSVP for the authenticated user.
     """
     editRSVP(updates: RSVPInput!): RSVP
+
+    """
+    Updates an existing user's name and/or email.
+    """
+    updateUser(id: ID!, input: UpdateUserInput!): User!
   }
 
   """
@@ -107,5 +117,3 @@ const typeDefs = gql`
     user: User!
   }
 `;
-
-export default typeDefs;

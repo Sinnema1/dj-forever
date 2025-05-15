@@ -36,7 +36,9 @@ const Login = () => {
       await login(formData.email, formData.password);
       navigate('/dashboard');
     } catch (error) {
-      console.error('Login error:', error);
+      if (import.meta.env.DEV) {
+        console.debug('Login error:', (error as Error).message);
+      }
       setErrorMsg((error as Error).message || 'Login failed.');
     } finally {
       setLoading(false);
