@@ -177,4 +177,74 @@ describe("🔐 Authentication & Registration", () => {
       res.body.data && res.body.data.me && typeof res.body.data.me.isInvited
     ).toBe("boolean");
   });
+
+  it("❌ rejects registration with missing fields", async () => {
+    const res = await request(app)
+      .post("/graphql")
+      .send({
+        query: `
+          mutation {
+            registerUser(fullName: "No Email", email: "", password: "Password123") {
+              token
+              user { email }
+            }
+          }
+        `,
+      });
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toMatch(/email.*required|invalid/i);
+  });
+
+  it("❌ rejects registration with invalid email", async () => {
+    const res = await request(app)
+      .post("/graphql")
+      .send({
+        query: `
+          mutation {
+            registerUser(fullName: "Bad Email", email: "notanemail", password: "Password123") {
+              token
+              user { email }
+            }
+          }
+        `,
+      });
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toMatch(/valid email/i);
+  });
+
+  it("❌ fails login with wrong email", async () => {
+    const res = await request(app)
+      .post("/graphql")
+      .send({
+        query: `
+          mutation {
+            loginUser(email: "notfound@example.com", password: "Password123") {
+              token
+              user { email }
+            }
+          }
+        `,
+      });
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toMatch(/invalid email or password/i);
+  });
+
+  it("❌ fails login with missing fields", async () => {
+    const res = await request(app)
+      .post("/graphql")
+      .send({
+        query: `
+          mutation {
+            loginUser(email: "", password: "") {
+              token
+              user { email }
+            }
+          }
+        `,
+      });
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toMatch(
+      /invalid email or password|required/i
+    );
+  });
 });

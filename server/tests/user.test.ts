@@ -79,4 +79,25 @@ describe("👤 User Queries", () => {
     // Your User type should now include isInvited
     expect(res.body.data && res.body.data.me).toHaveProperty("isInvited");
   });
+
+  it("❌ rejects 'me' query with invalid/expired token", async () => {
+    const res = await request(app)
+      .post("/graphql")
+      .set("Authorization", `Bearer invalidtoken123`)
+      .send({
+        query: `
+          query Me {
+            me {
+              _id
+              fullName
+              email
+            }
+          }
+        `,
+      });
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toMatch(
+      /authentication required|invalid token|must be logged in|context creation failed/i
+    );
+  });
 });

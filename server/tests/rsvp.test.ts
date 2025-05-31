@@ -160,4 +160,76 @@ describe("🎟 RSVP Queries & Mutations", () => {
     expect(edit.body.data.editRSVP.allergies).toBe("None");
     expect(edit.body.data.editRSVP.additionalNotes).toBe("Changed my RSVP");
   });
+
+  it("❌ rejects RSVP submission with missing required fields", async () => {
+    // Register a new user to ensure no RSVP exists yet
+    const registerRes = await request(app)
+      .post("/graphql")
+      .send({
+        query: `
+          mutation {
+            registerUser(
+              fullName: \"Missing Fields Tester\"
+              email: \"missingfields@example.com\"
+              password: \"Password123\"
+            ) { token }
+          }
+        `,
+      });
+    const newToken = registerRes.body.data.registerUser.token;
+    expect(newToken).toBeTypeOf("string");
+
+    const res = await request(app)
+      .post("/graphql")
+      .set("Authorization", `Bearer ${newToken}`)
+      .send({
+        query: `
+          mutation {
+            submitRSVP(attending: true, mealPreference: "") {
+              _id
+            }
+          }
+        `,
+      });
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toMatch(
+      /mealPreference.*required|invalid/i
+    );
+  });
+
+  it("❌ rejects RSVP submission with invalid attending value", async () => {
+    // Register a new user to ensure no RSVP exists yet
+    const registerRes = await request(app)
+      .post("/graphql")
+      .send({
+        query: `
+          mutation {
+            registerUser(
+              fullName: \"Invalid Attending Tester\"
+              email: \"invalidattending@example.com\"
+              password: \"Password123\"
+            ) { token }
+          }
+        `,
+      });
+    const newToken = registerRes.body.data.registerUser.token;
+    expect(newToken).toBeTypeOf("string");
+
+    const res = await request(app)
+      .post("/graphql")
+      .set("Authorization", `Bearer ${newToken}`)
+      .send({
+        query: `
+          mutation {
+            submitRSVP(attending: \"notaboolean\", mealPreference: \"Chicken\") {
+              _id
+            }
+          }
+        `,
+      });
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toMatch(
+      /attending.*boolean|invalid|boolean cannot represent a non boolean value/i
+    );
+  });
 });
