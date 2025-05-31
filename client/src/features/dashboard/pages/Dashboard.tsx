@@ -23,8 +23,11 @@ const Dashboard = () => {
   // Even if user is null, these hooks are called.
   // For useUsers, we pass user._id if available or an empty string.
   const userId = user?._id || '';
-  const { rsvps: rsvpData, loading: rsvpLoading, error: rsvpError } = useRSVP();
-  const { user: userData, loading: userLoading, error: userError } = useUsers(userId);
+
+  // ✅ Always call hooks outside conditionals
+  const { rsvp, loading: rsvpLoading, error: rsvpError } = useRSVP();
+
+  const { user: userData, loading: userLoading, error: userError } = useUsers();
 
   // Now conditionally render UI if user data isn't ready.
   if (!user) {
@@ -59,22 +62,21 @@ const Dashboard = () => {
         Welcome, {user.fullName}!
       </Typography>
 
-      {user.isInvited ? (
-        <Grid container spacing={3}>
-          {/* RSVP Summary Card */}
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">RSVP Summary</Typography>
-                <Typography variant="h4">
-                  {rsvpData.length} RSVP{rsvpData.length === 1 ? '' : 's'}
-                </Typography>
-                <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/rsvp')}>
-                  Manage RSVPs
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
+      <Grid container spacing={3}>
+        {/* RSVP Summary Card */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">RSVP Summary</Typography>
+              <Typography variant="h4">
+                {rsvp ? 1 : 0} RSVP{rsvp ? '' : 's'}
+              </Typography>
+              <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/rsvp')}>
+                Manage RSVPs
+              </Button>
+            </CardContent>
+          </Card>
+        </Grid>
 
           {/* User Profile Card */}
           <Grid item xs={12} md={6}>

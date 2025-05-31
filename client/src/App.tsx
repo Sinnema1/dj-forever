@@ -1,27 +1,22 @@
 import React, { useMemo, useState } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { CssBaseline, ThemeProvider } from '@mui/material';
 import { ApolloProvider } from '@apollo/client';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 
-import client from './apolloClient'; // Centralized ApolloClient configuration
+import client from './apolloClient';
+import AppRoutes from './routes/routes';
 import { getDesignTokens } from './styles/theme';
 import { ColorModeContext } from './context/ThemeMode';
 import { AuthProvider } from './context/AuthContext';
-import AppRoutes from './routes/routes';
 
-const App = () => {
-  const [mode, setMode] = useState<'light' | 'dark'>('light');
+const App: React.FC = () => {
+  const [mode, setMode] = useState<'light'|'dark'>('light');
 
-  // Toggle between light and dark mode
-  const colorMode = useMemo(
-    () => ({
-      mode,
-      toggleColorMode: () => setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light')),
-    }),
-    [mode],
-  );
+  const colorMode = useMemo(() => ({
+    mode,
+    toggleColorMode: () => setMode(m => m === 'light' ? 'dark' : 'light'),
+  }), [mode]);
 
-  // Create theme based on current mode
   const theme = useMemo(() => getDesignTokens(mode), [mode]);
 
   return (

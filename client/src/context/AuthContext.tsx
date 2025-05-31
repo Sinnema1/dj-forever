@@ -37,9 +37,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         variables: { email, password },
       });
 
-      // Expecting the mutation to return a token and a user object with isInvited
-      const authToken: string = data?.login?.token;
-      const authUser: UserType = data?.login?.user;
+      const authToken: string = data?.loginUser?.token;
+      const authUser: UserType = data?.loginUser?.user;
 
       if (!authToken || !authUser) {
         throw new Error('Invalid login response.');

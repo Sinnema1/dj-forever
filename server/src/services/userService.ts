@@ -13,9 +13,10 @@ import bcrypt from "bcrypt";
  */
 export const getUserById = async (userId: string) => {
   try {
-    if (!Types.ObjectId.isValid(userId)) throw createError("Invalid user ID.", 400);
+    if (!Types.ObjectId.isValid(userId))
+      throw createError("Invalid user ID.", 400);
 
-    const user = await User.findById(userId).populate("rsvpId").select("-password");
+    const user = await User.findById(userId).select("-password");
     if (!user) throw createError("User not found.", 404);
 
     return user;
@@ -33,7 +34,11 @@ export const getUserById = async (userId: string) => {
  * @returns {Promise<{ token: string; user: User }>} - The JWT token and user data.
  * @throws {Error} - If user already exists or creation fails.
  */
-export const createUser = async (fullName: string, email: string, password: string) => {
+export const createUser = async (
+  fullName: string,
+  email: string,
+  password: string
+) => {
   try {
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -63,14 +68,17 @@ export const authenticateUser = async (email: string, password: string) => {
   try {
     // Ensure password is retrieved from the database
     const user = await User.findOne({ email }).select("+password");
-    
+
     if (!user) {
       throw createError("Invalid email or password.", 401);
     }
 
     // Defensive check before password comparison
     if (!user.password) {
-      throw createError("User password is missing. Please reset your password.", 500);
+      throw createError(
+        "User password is missing. Please reset your password.",
+        500
+      );
     }
 
     // Compare provided password with stored hash

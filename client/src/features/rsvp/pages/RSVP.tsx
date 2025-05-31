@@ -27,10 +27,10 @@ const RSVPForm: React.FC = () => {
   // Local state for the RSVP form data, typed with RSVPFormData.
   const [formData, setFormData] = useState<RSVPFormData>({
     fullName: '',
-    email: '',
-    attending: '',
-    guests: 0,
-    notes: '',
+    attending: false,
+    mealPreference: '',
+    allergies: '',
+    additionalNotes: '',
   });
 
   // Local state for feedback messages.
@@ -42,11 +42,11 @@ const RSVPForm: React.FC = () => {
    * Converts "guests" input to a number.
    */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
-      // If the field is 'guests', convert the value to a number
-      [name]: name === 'guests' ? Number(value) : value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -57,7 +57,7 @@ const RSVPForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name as keyof RSVPFormData]: value,
+      [name]: value,
     }));
   };
 
@@ -68,9 +68,9 @@ const RSVPForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic form validation
-    if (!formData.fullName || !formData.email || !formData.attending) {
-      setErrorMessage('Please fill out all required fields.');
+    // ✅ Basic form validation
+    if (!formData.fullName || typeof formData.attending !== 'boolean' || !formData.mealPreference) {
+      setErrorMessage('Please fill out all required fields, including meal preference.');
       return;
     }
 
@@ -78,16 +78,15 @@ const RSVPForm: React.FC = () => {
       // Submit the RSVP data.
       await createRSVP({
         ...formData,
-        guests: Number(formData.guests), // ensure guests is a number
       });
       // On success, show a success message and reset the form.
       setSuccessMessage('RSVP submitted successfully!');
       setFormData({
         fullName: '',
-        email: '',
-        attending: '',
-        guests: 0,
-        notes: '',
+        attending: false,
+        mealPreference: '',
+        allergies: '',
+        additionalNotes: '',
       });
     } catch (error: unknown) {
       // Safely narrow the error type.
@@ -138,52 +137,51 @@ const RSVPForm: React.FC = () => {
           autoFocus
         />
 
-        {/* Email Field */}
-        <TextField
-          label="Email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          fullWidth
-          required
-          margin="normal"
-        />
-
         {/* Attending Select Field */}
         <FormControl fullWidth required margin="normal">
           <InputLabel id="attending-label">Attending?</InputLabel>
           <Select
             labelId="attending-label"
             name="attending"
-            value={formData.attending}
-            onChange={handleSelectChange}
+            value={formData.attending ? 'yes' : 'no'}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, attending: e.target.value === 'yes' }))
+            }
             label="Attending?"
           >
             <MenuItem value="yes">Yes</MenuItem>
             <MenuItem value="no">No</MenuItem>
-            <MenuItem value="maybe">Maybe</MenuItem>
           </Select>
         </FormControl>
 
-        {/* Number of Guests Field */}
+        {/* Meal Preference Field */}
         <TextField
-          label="Number of Guests"
-          name="guests"
-          type="number"
-          value={formData.guests}
+          label="Meal Preference"
+          name="mealPreference"
+          value={formData.mealPreference}
+          onChange={handleInputChange}
+          fullWidth
+          required
+          margin="normal"
+        />
+
+        {/* Allergies Field */}
+        <TextField
+          label="Allergies (optional)"
+          name="allergies"
+          value={formData.allergies}
           onChange={handleInputChange}
           fullWidth
           margin="normal"
         />
 
-        {/* Notes Field */}
+        {/* Additional Notes Field */}
         <TextField
-          label="Notes (optional)"
-          name="notes"
+          label="Additional Notes (optional)"
+          name="additionalNotes"
           multiline
           rows={4}
-          value={formData.notes}
+          value={formData.additionalNotes}
           onChange={handleInputChange}
           fullWidth
           margin="normal"

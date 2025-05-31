@@ -25,6 +25,7 @@ const typeDefs = gql`
     hasRSVPed: Boolean!
     rsvpId: ID
     rsvp: RSVP
+    isInvited: Boolean! # Added for test compatibility
   }
 
   """
@@ -37,7 +38,7 @@ const typeDefs = gql`
     mealPreference: String!
     allergies: String
     additionalNotes: String
-    createdAt: String! # Consider using a custom scalar (e.g. DateTime) if needed
+    fullName: String! # Added for test compatibility
   }
 
   """

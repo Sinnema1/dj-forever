@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { GraphQLError } from "graphql";
+import { GraphQLError } from "graphql/error";
 import dotenv from "dotenv";
 import { createError } from "../middleware/errorHandler.js";
 import { CONFIG } from "../constants/config.js";

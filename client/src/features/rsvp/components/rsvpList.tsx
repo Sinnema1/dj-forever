@@ -17,10 +17,10 @@ import { useRSVP } from '../hooks/useRSVP';
 import { RSVP } from '../types/rsvpTypes';
 
 const RSVPList = () => {
-  const { rsvps, loading, error } = useRSVP();
+  const { rsvp, loading, error } = useRSVP();
 
   if (error) {
-    return <Alert severity="error">Failed to load RSVPs.</Alert>;
+    return <Alert severity="error">Failed to load RSVP.</Alert>;
   }
 
   return (
@@ -47,45 +47,35 @@ const RSVPList = () => {
 
       <TableContainer component={Paper} sx={{ mt: 4, overflowX: 'auto' }}>
         <Typography variant="h5" sx={{ m: 2 }}>
-          RSVP List
+          RSVP Details
         </Typography>
 
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Full Name</TableCell>
-              <TableCell>Email</TableCell>
               <TableCell>Attending</TableCell>
-              <TableCell>Guests</TableCell>
-              <TableCell>Notes</TableCell>
+              <TableCell>Meal Preference</TableCell>
+              <TableCell>Allergies</TableCell>
+              <TableCell>Additional Notes</TableCell>
             </TableRow>
           </TableHead>
 
           <TableBody>
-            {rsvps.length === 0 ? (
+            {!rsvp ? (
               <TableRow>
                 <TableCell colSpan={5} align="center">
-                  No RSVPs found.
+                  No RSVP found.
                 </TableCell>
               </TableRow>
             ) : (
-              rsvps.map((rsvp: RSVP) => (
-                <TableRow key={rsvp._id}>
-                  <TableCell>{rsvp.fullName}</TableCell>
-                  <TableCell>{rsvp.email}</TableCell>
-                  <TableCell>
-                    {rsvp.attending === 'yes'
-                      ? 'Yes'
-                      : rsvp.attending === 'no'
-                        ? 'No'
-                        : rsvp.attending === 'maybe'
-                          ? 'Maybe'
-                          : '-'}
-                  </TableCell>
-                  <TableCell>{rsvp.guests}</TableCell>
-                  <TableCell>{rsvp.notes || '-'}</TableCell>
-                </TableRow>
-              ))
+              <TableRow key={rsvp._id}>
+                <TableCell>{rsvp.fullName}</TableCell>
+                <TableCell>{rsvp.attending ? 'Yes' : 'No'}</TableCell>
+                <TableCell>{rsvp.mealPreference}</TableCell>
+                <TableCell>{rsvp.allergies || '-'}</TableCell>
+                <TableCell>{rsvp.additionalNotes || '-'}</TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

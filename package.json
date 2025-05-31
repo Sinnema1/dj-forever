@@ -15,7 +15,13 @@
     "client:build": "cd client && npm run build",
     "seed": "cd server && npm run seed",
     "install": "cd server && npm i && cd ../client && npm i",
-    "render-build": "npm install && npm run build"
+    "render-build": "npm install && npm run build",
+    "lint": "npm run lint:server && npm run lint:client",
+    "lint:server": "cd server && npm run lint",
+    "lint:client": "cd client && npm run lint",
+    "format": "npm run format:server && npm run format:client",
+    "format:server": "cd server && npm run format || true",
+    "format:client": "cd client && npm run format || true"
   },
   "keywords": [],
   "author": "",

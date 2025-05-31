@@ -10,7 +10,7 @@
     "skipLibCheck": true /* Skip type checking of all declaration files (*.d.ts) for faster builds. */,
     
     /* Root and Output Directories */
-    "rootDir": "src" /* Specify the root folder within your source files. */,
+    "rootDir": "." /* Specify the root folder within your source files. */,
     "outDir": "dist" /* Specify an output folder for all emitted files. */,
 
     /* JavaScript Support */
@@ -35,11 +35,13 @@
     /* Path Mapping for Cleaner Imports */
     "baseUrl": "./src" /* Set the base directory to 'src' for absolute imports. */,
     "paths": {
-      "types/*": ["types/*"] /* Allow absolute imports for files inside src/types */
+      "types/*": ["types/*", "vitest/globals", "vite", "vitest", "node"] /* Allow absolute imports for files inside src/types */
     }
   },
   "include": [
     "src",
+    "tests", /* Include all TypeScript files inside the src and tests folders */
+    "tests/vitest.setup.ts" /* Include Vitest setup file for testing purposes */,
     "src/types/**/*.ts" /* Explicitly include all TypeScript files inside the types folder */
   ],
   "typeRoots": [
