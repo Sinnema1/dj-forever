@@ -28,9 +28,9 @@ const Dashboard = () => {
   const userId = user?._id || '';
 
   // ✅ Always call hooks outside conditionals
-  const { rsvps: rsvpData, loading: rsvpLoading, error: rsvpError } = useRSVP();
+  const { rsvp, loading: rsvpLoading, error: rsvpError } = useRSVP();
 
-  const { user: userData, loading: userLoading, error: userError } = useUsers(userId);
+  const { user: userData, loading: userLoading, error: userError } = useUsers();
 
   // ✅ Conditional UI logic (after hooks are called)
 
@@ -76,7 +76,7 @@ const Dashboard = () => {
             <CardContent>
               <Typography variant="h6">RSVP Summary</Typography>
               <Typography variant="h4">
-                {rsvpData.length} RSVP{rsvpData.length === 1 ? '' : 's'}
+                {rsvp ? 1 : 0} RSVP{rsvp ? '' : 's'}
               </Typography>
               <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate('/rsvp')}>
                 Manage RSVPs

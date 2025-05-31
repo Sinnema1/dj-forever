@@ -81,10 +81,12 @@ export const editRSVP = async (
       throw createError("Invalid user ID.", 400);
     }
 
+    console.log("[editRSVP service] updates argument:", updates);
     const rsvp = await RSVP.findOneAndUpdate({ userId }, updates, {
       new: true,
       runValidators: true,
     });
+    console.log("[editRSVP service] result from findOneAndUpdate:", rsvp);
 
     if (!rsvp) {
       throw createError("RSVP not found.", 404);

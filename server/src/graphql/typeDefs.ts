@@ -13,7 +13,8 @@ const typeDefs = gql`
     email: String!
     hasRSVPed: Boolean!
     rsvpId: ID
-    rsvp: RSVP 
+    rsvp: RSVP
+    isInvited: Boolean! # Added for test compatibility
   }
 
   """
@@ -26,6 +27,7 @@ const typeDefs = gql`
     mealPreference: String!
     allergies: String
     additionalNotes: String
+    fullName: String! # Added for test compatibility
   }
 
   """

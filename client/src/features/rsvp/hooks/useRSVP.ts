@@ -1,13 +1,13 @@
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_RSVPS } from '../graphql/queries';
+import { GET_RSVP } from '../graphql/queries';
 import { CREATE_RSVP } from '../graphql/mutations';
 import { RSVP, CreateRSVPInput } from '../types/rsvpTypes';
 
 /**
- * Interface for GET_RSVPS GraphQL query response.
+ * Interface for GET_RSVP GraphQL query response.
  */
-interface GetRSVPsResponse {
-  getRSVPs: RSVP[];
+interface GetRSVPResponse {
+  getRSVP: RSVP | null;
 }
 
 /**
@@ -18,16 +18,16 @@ interface CreateRSVPResponse {
 }
 
 /**
- * Custom hook to manage RSVP logic: fetch RSVPs and create new RSVP.
+ * Custom hook to manage RSVP logic: fetch RSVP for the current user and create a new RSVP.
  */
 export const useRSVP = () => {
-  // Fetch RSVPs from backend
+  // Fetch the current user's RSVP from backend
   const {
     data,
     loading: queryLoading,
     error: queryError,
     refetch,
-  } = useQuery<GetRSVPsResponse>(GET_RSVPS);
+  } = useQuery<GetRSVPResponse>(GET_RSVP);
 
   // Mutation hook to create RSVP
   const [executeCreateRSVP, { loading: mutationLoading, error: mutationError }] = useMutation<
@@ -36,7 +36,7 @@ export const useRSVP = () => {
   >(CREATE_RSVP);
 
   /**
-   * Create RSVP and refetch the RSVP list.
+   * Create RSVP and refetch the RSVP data.
    * @param formData - Data to create an RSVP (CreateRSVPInput)
    */
   const createRSVP = async (formData: CreateRSVPInput): Promise<void> => {
@@ -45,7 +45,7 @@ export const useRSVP = () => {
         variables: { input: formData },
       });
 
-      // Refetch RSVP list after creation
+      // Refetch RSVP data after creation
       await refetch();
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -59,7 +59,7 @@ export const useRSVP = () => {
   };
 
   return {
-    rsvps: data?.getRSVPs || [],
+    rsvp: data?.getRSVP || null,
     loading: queryLoading || mutationLoading,
     error: queryError || mutationError,
     createRSVP,

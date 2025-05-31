@@ -6,12 +6,7 @@ import prettier from 'eslint-plugin-prettier';
 
 export default /** @type {import('eslint').Linter.FlatConfig[]} */ ([
   {
-    ignores: [
-      'dist/',
-      'build/',
-      'node_modules/',
-      'vite.config.ts',
-    ],
+    ignores: ['dist/', 'build/', 'node_modules/', 'vite.config.ts'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -22,6 +17,8 @@ export default /** @type {import('eslint').Linter.FlatConfig[]} */ ([
       parserOptions: {
         project: './tsconfig.json',
         sourceType: 'module',
+        ecmaVersion: 2021,
+        ecmaFeatures: { jsx: true },
       },
     },
     plugins: {
@@ -43,6 +40,16 @@ export default /** @type {import('eslint').Linter.FlatConfig[]} */ ([
       '@typescript-eslint/no-unused-vars': ['warn'],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
+      'no-console': 'warn',
+      'no-debugger': 'warn',
+      'no-unused-vars': 'off',
+      'import/order': [
+        'warn',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
+          'newlines-between': 'always',
+        },
+      ],
     },
   },
 ]);

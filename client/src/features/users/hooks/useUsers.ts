@@ -1,14 +1,10 @@
 import { useQuery, useMutation } from '@apollo/client';
-import { GET_USERS, GET_USER_BY_ID } from '../graphql/queries';
+import { GET_ME } from '../graphql/queries';
 import { UPDATE_USER, DELETE_USER } from '../graphql/mutations';
 import { UserType, UpdateUserInput } from '../types/userTypes';
 
-interface GetUsersResponse {
-  getUsers: UserType[];
-}
-
-interface GetUserByIdResponse {
-  getUserById: UserType;
+interface GetMeResponse {
+  me: UserType;
 }
 
 interface UpdateUserResponse {
@@ -19,25 +15,14 @@ interface DeleteUserResponse {
   deleteUser: { _id: string };
 }
 
-export const useUsers = (userId?: string) => {
-  // Fetch all users (for admin views)
+export const useUsers = () => {
+  // Fetch the current user profile
   const {
-    data: allUsersData,
-    loading: usersLoading,
-    error: usersError,
-    refetch: refetchUsers,
-  } = useQuery<GetUsersResponse>(GET_USERS);
-
-  // Fetch a single user by ID (for profile views)
-  const {
-    data: userByIdData,
+    data: meData,
     loading: userLoading,
     error: userError,
     refetch: refetchUser,
-  } = useQuery<GetUserByIdResponse>(GET_USER_BY_ID, {
-    skip: !userId,
-    variables: { id: userId },
-  });
+  } = useQuery<GetMeResponse>(GET_ME);
 
   // Mutation to update a user
   const [updateUserMutation] = useMutation<
@@ -62,20 +47,19 @@ export const useUsers = (userId?: string) => {
   };
 
   /**
-   * Deletes a user and refetches the user list.
+   * Deletes a user.
    * @param id - The user ID to delete.
    */
   const deleteUser = async (id: string): Promise<void> => {
     await deleteUserMutation({ variables: { id } });
-    refetchUsers();
+    // No allUsers to refetch
   };
 
   return {
-    allUsers: allUsersData?.getUsers || [],
-    user: userByIdData?.getUserById || null,
-    loading: usersLoading || userLoading,
-    error: usersError || userError,
-    refetchUsers,
+    user: meData?.me || null,
+    loading: userLoading,
+    error: userError,
+    refetchUser,
     updateUser,
     deleteUser,
   };

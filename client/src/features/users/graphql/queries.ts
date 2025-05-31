@@ -21,3 +21,16 @@ export const GET_USER_BY_ID = gql`
     }
   }
 `;
+
+export const GET_ME = gql`
+  query Me {
+    me {
+      _id
+      fullName
+      email
+      hasRSVPed
+      rsvpId
+      isInvited
+    }
+  }
+`;

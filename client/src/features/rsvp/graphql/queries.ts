@@ -7,12 +7,12 @@ export const GET_RSVPS = gql`
   query GetRSVPs {
     getRSVPs {
       _id
-      fullName
-      email
+      userId
       attending
-      guests
-      notes
-      createdAt
+      mealPreference
+      allergies
+      additionalNotes
+      fullName
     }
   }
 `;
@@ -24,12 +24,29 @@ export const GET_RSVP_BY_ID = gql`
   query GetRSVPById($id: ID!) {
     getRSVPById(id: $id) {
       _id
-      fullName
-      email
+      userId
       attending
-      guests
-      notes
-      createdAt
+      mealPreference
+      allergies
+      additionalNotes
+      fullName
+    }
+  }
+`;
+
+/**
+ * Get the current user's RSVP (if authenticated)
+ */
+export const GET_RSVP = gql`
+  query GetRSVP {
+    getRSVP {
+      _id
+      userId
+      attending
+      mealPreference
+      allergies
+      additionalNotes
+      fullName
     }
   }
 `;

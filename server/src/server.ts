@@ -1,136 +1,91 @@
 import cors from "cors";
 import express, { Request, Response } from "express";
-import db from "./config/connection.js";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import { typeDefs, resolvers } from "./graphql/index.js";
-import { authenticateToken } from "./middleware/auth.js";
-import { errorHandler } from "./middleware/errorHandler.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import db from "./config/connection.js";
+import { typeDefs, resolvers } from "./graphql/index.js";
+import { createContext } from "./graphql/context.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 import { CONFIG } from "./constants/config.js";
 
-// Resolve __dirname in ES module environment
+// __dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/**
- * Defines the GraphQL Apollo Context interface.
- */
-export interface ApolloContext {
-  user: { _id: string; fullName: string; email: string } | null;
-}
-
-// Initialize Apollo Server
-const server = new ApolloServer({ typeDefs, resolvers });
-
-/**
- * Starts the Apollo GraphQL server and Express application.
- * Ensures database connectivity, authentication setup, and error handling.
- */
 const startApolloServer = async () => {
   try {
-    // Validate critical environment variables
-    // if (!CONFIG.JWT_SECRET || !process.env.someAPIKey) {
-    //   throw createError("Essential environment variables are missing.", 500);
-    // }
-
-    await server.start();
+    // 0) Validate critical env vars
+    if (!CONFIG.FRONTEND_URL) {
+      throw new Error(
+        "CONFIG.FRONTEND_URL is not defined. Check your environment variables."
+      );
+    }
+    // 1) connect to database
     await db();
 
+    // 2) start Apollo
+    const server = new ApolloServer({ typeDefs, resolvers });
+    await server.start();
+
+    // 3) create Express app
     const app = express();
-    const PORT = process.env.PORT || 3001;
+    const PORT = process.env.PORT ?? 3001;
 
-    /** 
-     * Enables CORS for frontend communication.
-     */
+    // 4) middleware
     app.use(cors({ origin: CONFIG.FRONTEND_URL }));
-    app.use(express.urlencoded({ extended: false }));
     app.use(express.json());
+    app.use(express.urlencoded({ extended: false }));
 
-    /**
-     * Configures GraphQL authentication middleware.
-     * Extracts user data from JWT and appends it to the request context.
-     */
+    // 5) GraphQL endpoint
     app.use(
       "/graphql",
       expressMiddleware(server, {
-        context: async ({ req }: { req: Request }): Promise<ApolloContext> => {
-          try {
-            const operationName = req.body?.operationName;
-
-            // Skip authentication for login & user registration mutations
-            if (["loginUser", "registerUser"].includes(operationName)) {
-              return { user: null };
-            }
-
-            // Authenticate all other requests
-            const context = authenticateToken({ req });
-
-            if (!context.user) {
-              return { user: null };
-            }
-
-            return {
-              user: {
-                _id: context.user._id.toString(),
-                fullName: context.user.fullName,
-                email: context.user.email,
-              },
-            };
-          } catch (error) {
-            console.error("Authentication error:", error);
-            return { user: null };
-          }
-        },
+        // pass in our context factory
+        context: createContext,
       })
     );
 
-    /**
-     * Serves the frontend React app in production.
-     */
+    // 6) serve client in prod
     if (process.env.NODE_ENV === "production") {
-      const clientPath = path.join(__dirname, "../../client/dist");
-      console.log(`Serving frontend from: ${clientPath}`);
-      app.use(express.static(clientPath));
+      const clientBuild = path.resolve(__dirname, "../../client/dist");
+      app.use(express.static(clientBuild));
       app.get("*", (_req: Request, res: Response) =>
-        res.sendFile(path.join(clientPath, "index.html"))
+        res.sendFile(path.join(clientBuild, "index.html"))
       );
     }
 
-    /**
-     * Health check endpoint to verify server uptime.
-     */
-    app.get("/health", (_req: Request, res: Response) =>
-      res.status(200).send("Server is healthy!")
-    );
+    // 7) health check
+    app.get("/health", (_req, res) => res.sendStatus(200));
 
-    /**
-     * Global error handling middleware.
-     */
+    // 8) global error handler
     app.use(errorHandler);
 
-    /**
-     * Starts the Express server and listens for incoming requests.
-     */
-    app.listen(PORT, () => {
-      console.log(`✅ API server running on port ${PORT}!`);
-      console.log(`🚀 Use GraphQL at http://localhost:${PORT}/graphql`);
+    // 9) start listening
+    const httpServer = app.listen(PORT, () => {
+      console.log(`✅ Server ready at http://localhost:${PORT}/graphql`);
     });
 
-    /**
-     * Graceful shutdown handling (e.g., for containerized environments).
-     */
-    process.on("SIGINT", async () => {
-      console.log("Shutting down gracefully...");
+    // 10) graceful shutdown
+    const shutdown = async () => {
+      console.log("🛑 Shutting down...");
       await server.stop();
-      process.exit(0);
-    });
-  } catch (error) {
-    console.error("❌ Server startup error:", error);
+      httpServer.close(() => process.exit(0));
+    };
+    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
+  } catch (err: unknown) {
+    console.error("❌ Failed to start server:", err);
     process.exit(1);
   }
 };
 
-// Start the Apollo + Express Server
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason) => {
+  console.error("❌ Unhandled Rejection:", reason);
+  process.exit(1);
+});
+
 startApolloServer();

@@ -1,70 +1,14 @@
 import React from 'react';
-import {
-  Box,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Button,
-  Typography,
-  Alert,
-  CircularProgress,
-} from '@mui/material';
-import { useUsers } from '../hooks/useUsers';
+import { Box, Typography, Alert } from '@mui/material';
 
 const ManageUsers = () => {
-  const { allUsers, loading, error, deleteUser } = useUsers();
-
-  if (loading)
-    return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <CircularProgress />
-      </Box>
-    );
-
-  if (error)
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">Failed to load users.</Alert>
-      </Box>
-    );
-
+  // The backend no longer supports listing all users
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, textAlign: 'center' }}>
       <Typography variant="h4" gutterBottom>
         Manage Users
       </Typography>
-
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Full Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Admin</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {allUsers.map((user) => (
-              <TableRow key={user._id}>
-                <TableCell>{user.fullName}</TableCell>
-                <TableCell>{user.email}</TableCell>
-                <TableCell>{user.isAdmin ? 'Yes' : 'No'}</TableCell>
-                <TableCell>
-                  <Button variant="outlined" color="error" onClick={() => deleteUser(user._id)}>
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Alert severity="info">User management is not available in this version.</Alert>
     </Box>
   );
 };

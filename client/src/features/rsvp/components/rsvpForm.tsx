@@ -20,10 +20,10 @@ import { useRSVP } from '../hooks/useRSVP';
  */
 interface RSVPFormData {
   fullName: string;
-  email: string;
-  attending: string;
-  guests: number;
-  notes: string;
+  attending: boolean;
+  mealPreference: string;
+  allergies?: string;
+  additionalNotes?: string;
 }
 
 const RSVPForm = () => {
@@ -31,10 +31,10 @@ const RSVPForm = () => {
 
   const [formData, setFormData] = useState<RSVPFormData>({
     fullName: '',
-    email: '',
-    attending: '',
-    guests: 0,
-    notes: '',
+    attending: false,
+    mealPreference: '',
+    allergies: '',
+    additionalNotes: '',
   });
 
   const [successMessage, setSuccessMessage] = useState('');
@@ -44,11 +44,11 @@ const RSVPForm = () => {
    * Handles changes for text fields
    */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
     setFormData((prevData) => ({
       ...prevData,
-      [name]: name === 'guests' ? Number(value) : value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -60,7 +60,7 @@ const RSVPForm = () => {
 
     setFormData((prevData) => ({
       ...prevData,
-      [name as keyof RSVPFormData]: value,
+      [name]: value,
     }));
   };
 
@@ -71,21 +71,23 @@ const RSVPForm = () => {
     e.preventDefault();
 
     // Basic validation
-    if (!formData.fullName || !formData.email || !formData.attending) {
+    if (!formData.fullName || typeof formData.attending !== 'boolean' || !formData.mealPreference) {
       setErrorMessage('Please fill out all required fields.');
       return;
     }
 
     try {
-      await createRSVP(formData);
+      await createRSVP({
+        ...formData,
+      });
 
       setSuccessMessage('RSVP submitted successfully!');
       setFormData({
         fullName: '',
-        email: '',
-        attending: '',
-        guests: 0,
-        notes: '',
+        attending: false,
+        mealPreference: '',
+        allergies: '',
+        additionalNotes: '',
       });
     } catch (error: unknown) {
       // Safely handle unknown errors
@@ -105,7 +107,8 @@ const RSVPForm = () => {
     setErrorMessage('');
   };
 
-  const isFormIncomplete = !formData.fullName || !formData.email || !formData.attending;
+  const isFormIncomplete =
+    !formData.fullName || typeof formData.attending !== 'boolean' || !formData.mealPreference;
 
   return (
     <Box
@@ -135,53 +138,53 @@ const RSVPForm = () => {
         autoFocus
       />
 
-      {/* Email */}
+      {/* Attending Select */}
+      <FormControl fullWidth required margin="normal">
+        <InputLabel id="attending-label">Attending?</InputLabel>
+        <Select
+          labelId="attending-label"
+          name="attending"
+          value={formData.attending ? 'yes' : 'no'}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, attending: e.target.value === 'yes' }))
+          }
+          label="Attending?"
+        >
+          <MenuItem value="yes">Yes</MenuItem>
+          <MenuItem value="no">No</MenuItem>
+        </Select>
+      </FormControl>
+
+      {/* Meal Preference */}
       <TextField
-        label="Email"
-        name="email"
-        type="email"
-        value={formData.email}
+        label="Meal Preference"
+        name="mealPreference"
+        value={formData.mealPreference}
         onChange={handleInputChange}
         fullWidth
         required
         margin="normal"
       />
 
-      {/* Attending Select */}
-      <FormControl fullWidth required margin="normal">
-        <InputLabel>Attending</InputLabel>
-        <Select
-          name="attending"
-          value={formData.attending}
-          onChange={handleSelectChange}
-          label="Attending"
-        >
-          <MenuItem value="yes">Yes</MenuItem>
-          <MenuItem value="no">No</MenuItem>
-          <MenuItem value="maybe">Maybe</MenuItem>
-        </Select>
-      </FormControl>
-
-      {/* Number of Guests */}
+      {/* Allergies */}
       <TextField
-        label="Guests"
-        name="guests"
-        type="number"
-        value={formData.guests}
+        label="Allergies (optional)"
+        name="allergies"
+        value={formData.allergies}
         onChange={handleInputChange}
         fullWidth
         margin="normal"
       />
 
-      {/* Notes */}
+      {/* Additional Notes */}
       <TextField
-        label="Notes (optional)"
-        name="notes"
-        value={formData.notes}
+        label="Additional Notes (optional)"
+        name="additionalNotes"
+        multiline
+        rows={4}
+        value={formData.additionalNotes}
         onChange={handleInputChange}
         fullWidth
-        multiline
-        rows={3}
         margin="normal"
       />
 

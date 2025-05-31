@@ -15,7 +15,7 @@ export const getUserById = async (userId: string) => {
   try {
     if (!Types.ObjectId.isValid(userId)) throw createError("Invalid user ID.", 400);
 
-    const user = await User.findById(userId).populate("rsvpId").select("-password");
+    const user = await User.findById(userId).select("-password");
     if (!user) throw createError("User not found.", 404);
 
     return user;
