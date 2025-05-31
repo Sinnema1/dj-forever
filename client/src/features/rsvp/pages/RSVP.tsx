@@ -71,8 +71,8 @@ const RSVPForm = () => {
     e.preventDefault();
 
     // ✅ Basic form validation
-    if (!formData.fullName || typeof formData.attending !== 'boolean') {
-      setErrorMessage('Please fill out all required fields.');
+    if (!formData.fullName || typeof formData.attending !== 'boolean' || !formData.mealPreference) {
+      setErrorMessage('Please fill out all required fields, including meal preference.');
       return;
     }
 
