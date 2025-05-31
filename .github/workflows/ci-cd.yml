@@ -1,0 +1,40 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            client/node_modules
+            server/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Install root dependencies
+        run: npm install
+      - name: Install and build server
+        run: cd server && npm install && npm run build && npm test
+      - name: Install and build client
+        run: cd client && npm install && npm run build && npm test
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy
+        env:
+          DEPLOY_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl "$DEPLOY_URL"

@@ -4,7 +4,7 @@ import {
   authenticateUser,
 } from "../services/userService.js";
 
-import invitedEmails from '../config/invitedList.js';
+// import invitedEmails from '../config/invitedList.js';
 
 import { submitRSVP, getRSVP, editRSVP } from "../services/rsvpService.js";
 
@@ -58,7 +58,6 @@ const resolvers = {
     me: async (_parent: any, _args: any, context: Context) => {
       try {
         if (!context.user)
-
           throw new AuthenticationError("You must be logged in.");
 
         return await getUserById(context.user._id);
@@ -94,7 +93,10 @@ const resolvers = {
      * Registers a new user and returns an authentication token.
      * @returns {Promise<{ token: string; user: UserType }>} Authentication token and user details.
      */
-    registerUser: async (_parent: any, { fullName, email, password }: UserInput) => {
+    registerUser: async (
+      _parent: any,
+      { fullName, email, password }: UserInput
+    ) => {
       try {
         return await createUser(fullName, email, password);
       } catch (error: any) {
