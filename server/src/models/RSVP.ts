@@ -6,7 +6,7 @@ import { Schema, model, type Document, Types } from "mongoose";
  */
 export interface RSVPDocument extends Document {
   userId: Types.ObjectId; // Use `Types.ObjectId` for consistency
-  attending: boolean;
+  attending: "YES" | "NO" | "MAYBE";
   mealPreference: string;
   allergies?: string;
   additionalNotes?: string;
@@ -25,7 +25,8 @@ const rsvpSchema = new Schema<RSVPDocument>(
       unique: true, // Ensures each user can submit only one RSVP
     },
     attending: {
-      type: Boolean,
+      type: String,
+      enum: ["YES", "NO", "MAYBE"],
       required: true,
     },
     mealPreference: {

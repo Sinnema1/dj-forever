@@ -21,11 +21,10 @@ const typeDefs = gql`
     fullName: String!
     email: String!
     isAdmin: Boolean!
-    isInvited: Boolean!
     hasRSVPed: Boolean!
     rsvpId: ID
     rsvp: RSVP
-    isInvited: Boolean! # Added for test compatibility
+    isInvited: Boolean! # Only one definition
   }
 
   """

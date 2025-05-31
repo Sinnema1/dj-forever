@@ -32,7 +32,7 @@ interface LoginInput {
  * Defines input fields for RSVP submission.
  */
 interface RSVPInput {
-  attending: boolean;
+  attending: "YES" | "NO" | "MAYBE"; // AttendanceStatus enum values
   mealPreference: string;
   allergies?: string;
   additionalNotes?: string;
@@ -140,14 +140,14 @@ const resolvers = {
         // Call the service function to create the RSVP.
         return await submitRSVP(
           context.user._id,
-          attending,
+          attending, // now AttendanceStatus enum value
           mealPreference,
           allergies,
           additionalNotes
         );
       } catch (error: any) {
         if (error.statusCode) throw error;
-        throw createError(`RSVP submission failed: ${error.message}`, 400);
+        throw createError(`RSVP submission failed: ${error.message}", 400`);
       }
     },
 
@@ -165,15 +165,23 @@ const resolvers = {
         if (!context.user)
           throw new AuthenticationError("You must be logged in.");
 
-        console.log("[editRSVP resolver] updates argument:", updates);
+        // Defensive: ensure updates.attending is a valid enum value if present
+        if (
+          updates.attending &&
+          !["YES", "NO", "MAYBE"].includes(updates.attending)
+        ) {
+          throw createError(
+            `Invalid attendance status: ${updates.attending}. Must be YES, NO, or MAYBE.`,
+            400
+          );
+        }
+
         const existingRSVP = await getRSVP(context.user._id);
         if (!existingRSVP)
           throw createError("No existing RSVP found for this user.", 404);
 
         const updated = await editRSVP(context.user._id, updates);
-        console.log("[editRSVP resolver] updated RSVP from service:", updated);
         const obj = updated.toObject ? updated.toObject() : updated;
-        console.log("[editRSVP resolver] final object returned:", obj);
         return obj;
       } catch (error: any) {
         if (error.statusCode) throw error;

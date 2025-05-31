@@ -77,7 +77,7 @@ describe("🎟 RSVP Queries & Mutations", () => {
         query: `
           mutation {
             submitRSVP(
-              attending: true
+              attending: YES
               mealPreference: "Vegetarian"
               allergies: "None"
               additionalNotes: "Can't wait!"
@@ -100,7 +100,7 @@ describe("🎟 RSVP Queries & Mutations", () => {
       res.body.data &&
         res.body.data.submitRSVP &&
         res.body.data.submitRSVP.attending
-    ).toBe(true);
+    ).toBe("YES");
   });
 
   it("❌ rejects duplicate RSVP submission", async () => {
@@ -111,7 +111,7 @@ describe("🎟 RSVP Queries & Mutations", () => {
         query: `
           mutation {
             submitRSVP(
-              attending: false
+              attending: NO
               mealPreference: "Vegan"
             ) {
               _id
@@ -133,7 +133,7 @@ describe("🎟 RSVP Queries & Mutations", () => {
           mutation {
             editRSVP(
               updates: {
-                attending: false
+                attending: NO
                 mealPreference: "Vegetarian"
                 allergies: "None"
                 additionalNotes: "Changed my RSVP"
@@ -155,7 +155,7 @@ describe("🎟 RSVP Queries & Mutations", () => {
         edit.body.data.editRSVP &&
         typeof edit.body.data.editRSVP.attending !== "undefined"
     ).toBe(true); // Field must exist
-    expect(edit.body.data.editRSVP.attending).toBe(false);
+    expect(edit.body.data.editRSVP.attending).toBe("NO");
     expect(edit.body.data.editRSVP.mealPreference).toBe("Vegetarian");
     expect(edit.body.data.editRSVP.allergies).toBe("None");
     expect(edit.body.data.editRSVP.additionalNotes).toBe("Changed my RSVP");
@@ -185,7 +185,7 @@ describe("🎟 RSVP Queries & Mutations", () => {
       .send({
         query: `
           mutation {
-            submitRSVP(attending: true, mealPreference: "") {
+            submitRSVP(attending: YES, mealPreference: "") {
               _id
             }
           }
@@ -221,7 +221,7 @@ describe("🎟 RSVP Queries & Mutations", () => {
       .send({
         query: `
           mutation {
-            submitRSVP(attending: \"notaboolean\", mealPreference: \"Chicken\") {
+            submitRSVP(attending: "notavalidstatus", mealPreference: "Chicken") {
               _id
             }
           }
@@ -229,7 +229,7 @@ describe("🎟 RSVP Queries & Mutations", () => {
       });
     expect(res.body.errors).toBeDefined();
     expect(res.body.errors[0].message).toMatch(
-      /attending.*boolean|invalid|boolean cannot represent a non boolean value/i
+      /attending.*YES, NO, or MAYBE|invalid|enum/i
     );
   });
 });
