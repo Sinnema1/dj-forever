@@ -4,29 +4,29 @@
       "fullName": "Alice Johnson",
       "email": "alice@example.com",
       "password": "SecurePass123!",
-      "hasRSVPed": true,
-      "rsvpId": "65d1f90a1c2a4b001e4a5a8c"
+      "isInvited": true,
+      "hasRSVPed": true
     },
     {
       "fullName": "Bob Smith",
       "email": "bob@example.com",
       "password": "SecurePass456!",
-      "hasRSVPed": true,
-      "rsvpId": "65d1f90a1c2a4b001e4a5a8d"
+      "isInvited": true,
+      "hasRSVPed": true
     },
     {
       "fullName": "Charlie Williams",
       "email": "charlie@example.com",
       "password": "SecurePass789!",
-      "hasRSVPed": false,
-      "rsvpId": null
+      "isInvited": false,
+      "hasRSVPed": false
     },
     {
       "fullName": "Diana Brown",
       "email": "diana@example.com",
       "password": "SecurePassABC!",
-      "hasRSVPed": true,
-      "rsvpId": "65d1f90a1c2a4b001e4a5a8e"
+      "isInvited": true,
+      "hasRSVPed": true
     }
   ]
 }

@@ -18,14 +18,13 @@ import { useRSVP } from '../hooks/useRSVP';
 import { RSVPFormData } from '../types/rsvpTypes';
 
 /**
- * RSVPForm component
- * Renders a form for users to submit an RSVP
+ * RSVPForm component renders the RSVP submission form.
  */
-const RSVPForm = () => {
-  // ✅ Custom hook to handle RSVP logic (query/mutations)
+const RSVPForm: React.FC = () => {
+  // Get the createRSVP function and loading state from the custom useRSVP hook.
   const { createRSVP, loading } = useRSVP();
 
-  // ✅ Local state for form inputs
+  // Local state for the RSVP form data, typed with RSVPFormData.
   const [formData, setFormData] = useState<RSVPFormData>({
     fullName: '',
     attending: false,
@@ -34,13 +33,13 @@ const RSVPForm = () => {
     additionalNotes: '',
   });
 
-  // ✅ Snackbar messages for success/error feedback
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  // Local state for feedback messages.
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   /**
-   * Handle changes in TextField inputs
-   * Converts "guests" to number
+   * Updates formData when a text field changes.
+   * Converts "guests" input to a number.
    */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -52,11 +51,10 @@ const RSVPForm = () => {
   };
 
   /**
-   * Handle changes in Select inputs (attending)
+   * Updates formData when the Select field changes.
    */
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
     const { name, value } = e.target;
-
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -64,8 +62,8 @@ const RSVPForm = () => {
   };
 
   /**
-   * Handle form submission
-   * Runs basic validation before calling the mutation
+   * Handles the form submission.
+   * Validates the required fields and calls createRSVP mutation.
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,12 +75,11 @@ const RSVPForm = () => {
     }
 
     try {
-      // ✅ Submit RSVP with cleaned data
+      // Submit the RSVP data.
       await createRSVP({
         ...formData,
       });
-
-      // ✅ Show success message + reset form
+      // On success, show a success message and reset the form.
       setSuccessMessage('RSVP submitted successfully!');
       setFormData({
         fullName: '',
@@ -92,14 +89,15 @@ const RSVPForm = () => {
         additionalNotes: '',
       });
     } catch (error: unknown) {
-      // ✅ Catch block handling unknown error
-      const errMsg = error instanceof Error ? error.message : 'Something went wrong.';
+      // Safely narrow the error type.
+      const errMsg =
+        error instanceof Error ? error.message : 'Something went wrong. Please try again.';
       setErrorMessage(errMsg);
     }
   };
 
   /**
-   * Reset snackbars on close
+   * Closes any open snackbar messages.
    */
   const handleCloseSnackbar = () => {
     setSuccessMessage('');
@@ -108,12 +106,12 @@ const RSVPForm = () => {
 
   return (
     <Container maxWidth="sm">
-      {/* Page title */}
+      {/* Page Title */}
       <Typography variant="h4" gutterBottom align="center">
         RSVP Form
       </Typography>
 
-      {/* Main form container */}
+      {/* Form Container */}
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -136,6 +134,7 @@ const RSVPForm = () => {
           fullWidth
           required
           margin="normal"
+          autoFocus
         />
 
         {/* Attending Select Field */}
@@ -201,7 +200,7 @@ const RSVPForm = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }} role="alert">
           {successMessage}
         </Alert>
       </Snackbar>
@@ -213,7 +212,7 @@ const RSVPForm = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }} role="alert">
           {errorMessage}
         </Alert>
       </Snackbar>

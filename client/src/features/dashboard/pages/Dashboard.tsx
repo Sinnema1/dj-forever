@@ -1,7 +1,6 @@
+// client/src/features/dashboard/pages/Dashboard.tsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// MUI Components
 import {
   Box,
   Card,
@@ -12,19 +11,17 @@ import {
   Alert,
   Grid,
 } from '@mui/material';
-
-// Hooks & Context
 import { useAuth } from '../../../context/AuthContext';
 import { useRSVP } from '../../rsvp/hooks/useRSVP';
 import { useUsers } from '../../users/hooks/useUsers';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
-  // ✅ Grab logged-in user from AuthContext (always call hooks at the top level)
   const { user } = useAuth();
 
-  // ✅ Ensure a user ID exists (fallback to an empty string to satisfy TS)
+  // Always call hooks unconditionally.
+  // Even if user is null, these hooks are called.
+  // For useUsers, we pass user._id if available or an empty string.
   const userId = user?._id || '';
 
   // ✅ Always call hooks outside conditionals
@@ -32,9 +29,7 @@ const Dashboard = () => {
 
   const { user: userData, loading: userLoading, error: userError } = useUsers();
 
-  // ✅ Conditional UI logic (after hooks are called)
-
-  // Handle case: User not loaded yet
+  // Now conditionally render UI if user data isn't ready.
   if (!user) {
     return (
       <Box sx={{ flexGrow: 1, p: 3 }}>
@@ -61,12 +56,10 @@ const Dashboard = () => {
     );
   }
 
-  // ✅ If all data is available, render the dashboard
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
-      {/* Welcome message */}
       <Typography variant="h4" gutterBottom>
-        Welcome, {user.fullName || 'Guest'}!
+        Welcome, {user.fullName}!
       </Typography>
 
       <Grid container spacing={3}>
@@ -85,20 +78,26 @@ const Dashboard = () => {
           </Card>
         </Grid>
 
-        {/* User Profile Card */}
-        <Grid item xs={12} md={6}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6">Your Profile</Typography>
-              <Typography>Name: {userData?.fullName || 'N/A'}</Typography>
-              <Typography>Email: {userData?.email || 'N/A'}</Typography>
-              <Button variant="outlined" sx={{ mt: 2 }} onClick={() => navigate('/profile')}>
-                Edit Profile
-              </Button>
-            </CardContent>
-          </Card>
+          {/* User Profile Card */}
+          <Grid item xs={12} md={6}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6">Your Profile</Typography>
+                <Typography>Name: {userData?.fullName || 'N/A'}</Typography>
+                <Typography>Email: {userData?.email || 'N/A'}</Typography>
+                <Button variant="outlined" sx={{ mt: 2 }} onClick={() => navigate('/profile')}>
+                  Edit Profile
+                </Button>
+              </CardContent>
+            </Card>
+          </Grid>
         </Grid>
-      </Grid>
+      ) : (
+        <Typography variant="body1" gutterBottom>
+          Unfortunately, you are not on the invited list for this wedding. Please contact the
+          organizer if you believe this is an error.
+        </Typography>
+      )}
     </Box>
   );
 };

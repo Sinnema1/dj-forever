@@ -5,8 +5,8 @@ export interface UserType {
   _id: string;
   fullName: string;
   email: string;
-  username?: string; // Optional: include usernames if required in the future
   isAdmin?: boolean; // Optional: used if admin roles are supported
+  isInvited: boolean;
 }
 
 /**

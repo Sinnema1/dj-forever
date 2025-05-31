@@ -25,6 +25,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Update state on input change
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -33,17 +34,18 @@ const Register = () => {
     }));
   }, []);
 
+  // Handle form submission with basic validations
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setErrorMsg('');
 
+    // Basic validation: password confirmation and length
     if (formData.password !== formData.confirmPassword) {
       setErrorMsg('Passwords do not match.');
       setLoading(false);
       return;
     }
-
     if (formData.password.length < 8) {
       setErrorMsg('Password must be at least 8 characters.');
       setLoading(false);
@@ -51,6 +53,8 @@ const Register = () => {
     }
 
     try {
+      // Attempt to register the user.
+      // The backend will determine and set the isInvited field in the user model.
       await registerUser(formData.fullName, formData.email, formData.password);
       navigate('/dashboard');
     } catch (error) {
