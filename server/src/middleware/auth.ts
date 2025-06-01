@@ -36,13 +36,17 @@ export const authenticateToken = ({ req }: { req: any }) => {
   // Skip auth for Introspection Queries and missing tokens
   if (!token) {
     if (req.body?.operationName === "IntrospectionQuery") {
-      console.log(`Skipping auth for ${req.body.operationName}.`);
+      if (process.env.NODE_ENV !== "test") {
+        console.log(`Skipping auth for ${req.body.operationName}.`);
+      }
     } else {
-      console.log(
-        `No token provided for ${
-          req.body?.operationName || "Unknown Operation"
-        }.`
-      );
+      if (process.env.NODE_ENV !== "test") {
+        console.log(
+          `No token provided for ${
+            req.body?.operationName || "Unknown Operation"
+          }.`
+        );
+      }
     }
     return { req }; // Proceed without attaching a user
   }
