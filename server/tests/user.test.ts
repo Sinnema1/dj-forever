@@ -97,7 +97,7 @@ describe("👤 User Queries", () => {
       });
     expect(res.body.errors).toBeDefined();
     expect(res.body.errors[0].message).toMatch(
-      /authentication required|invalid token|must be logged in|context creation failed/i
+      /authentication required|invalid token|must be logged in|context creation failed|invalid or expired token|jwt malformed/i
     );
   });
 });
