@@ -2,14 +2,14 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/server.js",
+  "main": "dist/src/server.js",
   "type": "module",
   "engines": {
     "node": "18.x"
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "watch": "nodemon --watch src --exec \"tsx src/server.ts\"",
     "seed": "node dist/src/seeds/index.js",
     "test": "vitest"
