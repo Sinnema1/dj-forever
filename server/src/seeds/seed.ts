@@ -13,6 +13,10 @@ export const seedDatabase = async () => {
   try {
     console.log("🚀 Starting database seeding...");
 
+    // Clean up collections before seeding
+    await User.deleteMany({});
+    await RSVP.deleteMany({});
+
     // Read and parse user & RSVP data from JSON files
     const userData = JSON.parse(fs.readFileSync("./src/seeds/userData.json", "utf-8"));
     const rsvpData = JSON.parse(fs.readFileSync("./src/seeds/rsvpData.json", "utf-8"));

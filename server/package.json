@@ -11,7 +11,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "watch": "nodemon --watch src --exec \"tsx src/server.ts\"",
-    "seed": "node dist/seeds/index.js",
+    "seed": "node dist/src/seeds/index.js",
     "test": "vitest"
   },
   "keywords": [],
