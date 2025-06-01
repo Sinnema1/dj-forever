@@ -6,7 +6,7 @@ import { createError } from "../middleware/errorHandler.js";
  * Submits an RSVP for an authenticated user.
  *
  * @param {string} userId - The user's ID.
- * @param {boolean} attending - Whether the user is attending.
+ * @param {"YES" | "NO" | "MAYBE"} attending - Attendance status (enum).
  * @param {string} mealPreference - The user's meal choice.
  * @param {string} [allergies] - Optional allergies.
  * @param {string} [additionalNotes] - Optional additional notes.
@@ -14,7 +14,7 @@ import { createError } from "../middleware/errorHandler.js";
  */
 export const submitRSVP = async (
   userId: string,
-  attending: boolean,
+  attending: "YES" | "NO" | "MAYBE",
   mealPreference: string,
   allergies?: string,
   additionalNotes?: string
@@ -31,7 +31,7 @@ export const submitRSVP = async (
 
     const newRSVP = await RSVP.create({
       userId: new Types.ObjectId(userId),
-      attending,
+      attending, // now AttendanceStatus enum value
       mealPreference,
       allergies: allergies || "",
       additionalNotes: additionalNotes || "",
@@ -40,7 +40,7 @@ export const submitRSVP = async (
     return newRSVP;
   } catch (error: any) {
     if (error.statusCode) throw error;
-    throw createError(`Error submitting RSVP: ${error.message}`, 500);
+    throw createError(`Error submitting RSVP: ${error.message}", 500`);
   }
 };
 
@@ -81,12 +81,21 @@ export const editRSVP = async (
       throw createError("Invalid user ID.", 400);
     }
 
-    console.log("[editRSVP service] updates argument:", updates);
+    // Defensive: ensure updates.attending is a valid enum value if present
+    if (
+      updates.attending &&
+      !["YES", "NO", "MAYBE"].includes(updates.attending)
+    ) {
+      throw createError(
+        `Invalid attendance status: ${updates.attending}. Must be YES, NO, or MAYBE.`,
+        400
+      );
+    }
+
     const rsvp = await RSVP.findOneAndUpdate({ userId }, updates, {
       new: true,
       runValidators: true,
     });
-    console.log("[editRSVP service] result from findOneAndUpdate:", rsvp);
 
     if (!rsvp) {
       throw createError("RSVP not found.", 404);
@@ -95,6 +104,6 @@ export const editRSVP = async (
     return rsvp;
   } catch (error: any) {
     if (error.statusCode) throw error;
-    throw createError(`Error updating RSVP: ${error.message}`, 500);
+    throw createError(`Error updating RSVP: ${error.message}", 500`);
   }
 };

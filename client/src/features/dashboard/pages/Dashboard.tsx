@@ -78,20 +78,25 @@ const Dashboard = () => {
           </Card>
         </Grid>
 
+        <Grid item xs={12} md={6}>
           {/* User Profile Card */}
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">Your Profile</Typography>
-                <Typography>Name: {userData?.fullName || 'N/A'}</Typography>
-                <Typography>Email: {userData?.email || 'N/A'}</Typography>
-                <Button variant="outlined" sx={{ mt: 2 }} onClick={() => navigate('/profile')}>
-                  Edit Profile
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
+          <Card>
+            <CardContent>
+              <Typography variant="h6">Your Profile</Typography>
+              <Typography>Name: {userData?.fullName || 'N/A'}</Typography>
+              <Typography>Email: {userData?.email || 'N/A'}</Typography>
+              <Button variant="outlined" sx={{ mt: 2 }} onClick={() => navigate('/profile')}>
+                Edit Profile
+              </Button>
+            </CardContent>
+          </Card>
         </Grid>
+      </Grid>
+
+      {rsvp ? (
+        <Typography variant="body1" gutterBottom>
+          You are invited to the wedding! Please let us know if you will be attending.
+        </Typography>
       ) : (
         <Typography variant="body1" gutterBottom>
           Unfortunately, you are not on the invited list for this wedding. Please contact the

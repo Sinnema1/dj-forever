@@ -66,7 +66,13 @@ describe("🔐 Authentication & Registration", () => {
           }
         `,
       });
-
+    if (
+      !res.body.data ||
+      !res.body.data.registerUser ||
+      !res.body.data.registerUser.token
+    ) {
+      console.error("Register response:", JSON.stringify(res.body, null, 2));
+    }
     // Defensive: check data exists before accessing
     expect(
       res.body.data &&
@@ -125,7 +131,13 @@ describe("🔐 Authentication & Registration", () => {
           }
         `,
       });
-
+    if (
+      !res.body.data ||
+      !res.body.data.loginUser ||
+      !res.body.data.loginUser.token
+    ) {
+      console.error("Login response:", JSON.stringify(res.body, null, 2));
+    }
     expect(res.body.data.loginUser.token).toBeTypeOf("string");
   });
 

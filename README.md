@@ -1,4 +1,4 @@
-# DJ Forever RSVP App
+# DJ Forever Wedding App
 
 A fullstack RSVP and user management application for events, built with:
 
@@ -10,7 +10,7 @@ A fullstack RSVP and user management application for events, built with:
 
 ## Table of Contents
 
-- [DJ Forever RSVP App](#dj-forever-rsvp-app)
+- [DJ Forever Wedding App](#dj-forever-wedding-app)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Tech Stack](#tech-stack)
