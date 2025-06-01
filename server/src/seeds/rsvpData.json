@@ -2,21 +2,21 @@
   "rsvps": [
     {
       "userEmail": "alice@example.com",
-      "attending": true,
+      "attending": "YES",
       "mealPreference": "Vegetarian",
       "allergies": "None",
       "additionalNotes": "Excited for the event!"
     },
     {
       "userEmail": "bob@example.com",
-      "attending": true,
+      "attending": "YES",
       "mealPreference": "Chicken",
       "allergies": "Peanuts",
       "additionalNotes": "Would love a seat near friends."
     },
     {
       "userEmail": "diana@example.com",
-      "attending": true,
+      "attending": "YES",
       "mealPreference": "Vegan",
       "allergies": "Shellfish",
       "additionalNotes": ""
