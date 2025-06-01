@@ -18,8 +18,12 @@ export const seedDatabase = async () => {
     await RSVP.deleteMany({});
 
     // Read and parse user & RSVP data from JSON files
-    const userData = JSON.parse(fs.readFileSync("./src/seeds/userData.json", "utf-8"));
-    const rsvpData = JSON.parse(fs.readFileSync("./src/seeds/rsvpData.json", "utf-8"));
+    const userData = JSON.parse(
+      fs.readFileSync("./src/seeds/userData.json", "utf-8")
+    );
+    const rsvpData = JSON.parse(
+      fs.readFileSync("./src/seeds/rsvpData.json", "utf-8")
+    );
 
     // ✅ Hash passwords before inserting users and explicitly map all required fields
     const usersWithHashedPasswords = await Promise.all(
@@ -27,8 +31,8 @@ export const seedDatabase = async () => {
         fullName: user.fullName,
         email: user.email,
         password: await bcrypt.hash(user.password, 10),
-        isInvited: user.isInvited,   // explicitly include isInvited
-        hasRSVPed: user.hasRSVPed      // explicitly include hasRSVPed
+        isInvited: user.isInvited, // explicitly include isInvited
+        hasRSVPed: user.hasRSVPed, // explicitly include hasRSVPed
       }))
     );
 
@@ -39,7 +43,9 @@ export const seedDatabase = async () => {
     console.log(`✅ Inserted ${insertedUsers.length} users.`);
 
     // ✅ Create a user lookup (email → ObjectId)
-    const userMap = new Map(insertedUsers.map((user) => [user.email, user._id]));
+    const userMap = new Map(
+      insertedUsers.map((user) => [user.email, user._id])
+    );
 
     // ✅ Validate & map RSVPs with correct userIds
     const rsvpsWithUserIds = rsvpData.rsvps
@@ -60,7 +66,10 @@ export const seedDatabase = async () => {
 
       // ✅ Update users with their RSVP references
       for (const rsvp of insertedRSVPs) {
-        await User.findByIdAndUpdate(rsvp.userId, { rsvpId: rsvp._id, hasRSVPed: true });
+        await User.findByIdAndUpdate(rsvp.userId, {
+          rsvpId: rsvp._id,
+          hasRSVPed: true,
+        });
       }
       console.log("🎉 Database seeding completed successfully!");
     } else {
