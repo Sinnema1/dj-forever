@@ -1,7 +1,7 @@
 export interface RSVP {
   _id: string;
   userId: string;
-  attending: boolean;
+  attending: "YES" | "NO" | "MAYBE";
   mealPreference: string;
   allergies?: string;
   additionalNotes?: string;
@@ -9,7 +9,7 @@ export interface RSVP {
 }
 
 export interface CreateRSVPInput {
-  attending: boolean;
+  attending: "YES" | "NO" | "MAYBE";
   mealPreference: string;
   allergies?: string;
   additionalNotes?: string;
@@ -17,7 +17,7 @@ export interface CreateRSVPInput {
 }
 
 export interface RSVPFormData {
-  attending: boolean;
+  attending: "YES" | "NO" | "MAYBE";
   mealPreference: string;
   allergies?: string;
   additionalNotes?: string;

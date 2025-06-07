@@ -27,7 +27,7 @@ const RSVPForm: React.FC = () => {
   // Local state for the RSVP form data, typed with RSVPFormData.
   const [formData, setFormData] = useState<RSVPFormData>({
     fullName: '',
-    attending: false,
+    attending: "NO", // default to "NO" (enum string)
     mealPreference: '',
     allergies: '',
     additionalNotes: '',
@@ -57,7 +57,7 @@ const RSVPForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: value as "YES" | "NO" | "MAYBE",
     }));
   };
 
@@ -69,7 +69,7 @@ const RSVPForm: React.FC = () => {
     e.preventDefault();
 
     // ✅ Basic form validation
-    if (!formData.fullName || typeof formData.attending !== 'boolean' || !formData.mealPreference) {
+    if (!formData.fullName || !formData.attending || !formData.mealPreference) {
       setErrorMessage('Please fill out all required fields, including meal preference.');
       return;
     }
@@ -83,7 +83,7 @@ const RSVPForm: React.FC = () => {
       setSuccessMessage('RSVP submitted successfully!');
       setFormData({
         fullName: '',
-        attending: false,
+        attending: "NO",
         mealPreference: '',
         allergies: '',
         additionalNotes: '',
@@ -143,14 +143,13 @@ const RSVPForm: React.FC = () => {
           <Select
             labelId="attending-label"
             name="attending"
-            value={formData.attending ? 'yes' : 'no'}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, attending: e.target.value === 'yes' }))
-            }
+            value={formData.attending}
+            onChange={handleSelectChange}
             label="Attending?"
           >
-            <MenuItem value="yes">Yes</MenuItem>
-            <MenuItem value="no">No</MenuItem>
+            <MenuItem value="YES">Yes</MenuItem>
+            <MenuItem value="NO">No</MenuItem>
+            <MenuItem value="MAYBE">Maybe</MenuItem>
           </Select>
         </FormControl>
 
