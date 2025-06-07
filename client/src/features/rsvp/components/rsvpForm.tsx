@@ -20,7 +20,7 @@ import { useRSVP } from '../hooks/useRSVP';
  */
 interface RSVPFormData {
   fullName: string;
-  attending: boolean;
+  attending: 'YES' | 'NO' | 'MAYBE';
   mealPreference: string;
   allergies?: string;
   additionalNotes?: string;
@@ -31,7 +31,7 @@ const RSVPForm = () => {
 
   const [formData, setFormData] = useState<RSVPFormData>({
     fullName: '',
-    attending: false,
+    attending: 'NO', // default to "NO" (enum string)
     mealPreference: '',
     allergies: '',
     additionalNotes: '',
@@ -71,7 +71,7 @@ const RSVPForm = () => {
     e.preventDefault();
 
     // Basic validation
-    if (!formData.fullName || typeof formData.attending !== 'boolean' || !formData.mealPreference) {
+    if (!formData.fullName || !formData.attending || !formData.mealPreference) {
       setErrorMessage('Please fill out all required fields.');
       return;
     }
@@ -84,7 +84,7 @@ const RSVPForm = () => {
       setSuccessMessage('RSVP submitted successfully!');
       setFormData({
         fullName: '',
-        attending: false,
+        attending: 'NO',
         mealPreference: '',
         allergies: '',
         additionalNotes: '',
@@ -107,8 +107,7 @@ const RSVPForm = () => {
     setErrorMessage('');
   };
 
-  const isFormIncomplete =
-    !formData.fullName || typeof formData.attending !== 'boolean' || !formData.mealPreference;
+  const isFormIncomplete = !formData.fullName || !formData.attending || !formData.mealPreference;
 
   return (
     <Box
@@ -144,14 +143,18 @@ const RSVPForm = () => {
         <Select
           labelId="attending-label"
           name="attending"
-          value={formData.attending ? 'yes' : 'no'}
+          value={formData.attending}
           onChange={(e) =>
-            setFormData((prev) => ({ ...prev, attending: e.target.value === 'yes' }))
+            setFormData((prev) => ({
+              ...prev,
+              attending: e.target.value as 'YES' | 'NO' | 'MAYBE',
+            }))
           }
           label="Attending?"
         >
-          <MenuItem value="yes">Yes</MenuItem>
-          <MenuItem value="no">No</MenuItem>
+          <MenuItem value="YES">Yes</MenuItem>
+          <MenuItem value="NO">No</MenuItem>
+          <MenuItem value="MAYBE">Maybe</MenuItem>
         </Select>
       </FormControl>
 
