@@ -12,6 +12,7 @@
     "start": "node dist/src/server.js",
     "watch": "nodemon --watch src --exec \"tsx src/server.ts\"",
     "seed": "node dist/src/seeds/index.js",
+    "clean:db": "node dist/src/seeds/cleanDB.js",
     "test": "vitest"
   },
   "keywords": [],
