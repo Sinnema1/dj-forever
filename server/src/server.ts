@@ -33,6 +33,15 @@ const startApolloServer = async () => {
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
 
+    // 5.5) log all GraphQL requests
+    app.use("/graphql", (req, _res, next) => {
+      console.log(
+        `[GRAPHQL] ${req.method} ${req.originalUrl} | headers:`,
+        req.headers
+      );
+      next();
+    });
+
     // 5) GraphQL endpoint
     app.use(
       "/graphql",
@@ -46,14 +55,32 @@ const startApolloServer = async () => {
     // REMOVED: static file serving for client build, since frontend is deployed separately
 
     // 7) health check
-    app.get("/health", (_req, res) => res.sendStatus(200));
+    app.get("/health", (req, res) => {
+      console.log(
+        `[HEALTH] ${req.method} ${req.originalUrl} | headers:`,
+        req.headers
+      );
+      res.sendStatus(200);
+    });
+
+    // 7.5) root route for Render/health checks
+    app.get("/", (req, res) => {
+      console.log(
+        `[ROOT] ${req.method} ${req.originalUrl} | headers:`,
+        req.headers
+      );
+      res.status(200).send("DJ Forever API is running.");
+    });
 
     // 8) global error handler
     app.use(errorHandler);
 
     // 8.5) catch-all logger for unexpected requests
     app.use((req, _res, next) => {
-      console.log(`[BACKEND] 404 Not Found: ${req.method} ${req.originalUrl}`);
+      console.log(
+        `[BACKEND] 404 Not Found: ${req.method} ${req.originalUrl} | headers:`,
+        req.headers
+      );
       next();
     });
 
