@@ -51,6 +51,12 @@ const startApolloServer = async () => {
     // 8) global error handler
     app.use(errorHandler);
 
+    // 8.5) catch-all logger for unexpected requests
+    app.use((req, _res, next) => {
+      console.log(`[BACKEND] 404 Not Found: ${req.method} ${req.originalUrl}`);
+      next();
+    });
+
     // 9) start listening
     const httpServer = app.listen(PORT, () => {
       console.log(`✅ Server ready at http://localhost:${PORT}/graphql`);
