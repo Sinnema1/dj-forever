@@ -27,7 +27,6 @@ export interface CreateUserInput {
   fullName: string;
   email: string;
   password: string;
-  username?: string; // Optional: include if usernames are implemented
 }
 
 /**
@@ -37,6 +36,5 @@ export interface UpdateUserInput {
   _id: string; // ID of the user to update (required)
   fullName?: string;
   email?: string;
-  username?: string;
   password?: string;
 }
