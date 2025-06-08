@@ -7,7 +7,6 @@ export const GET_ME = gql`
   query GetMe {
     me {
       _id
-      username
       email
       fullName
       isAdmin
