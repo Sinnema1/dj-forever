@@ -1,4 +1,17 @@
 import React, { useMemo, useState } from 'react';
+// NOTE: We're using HashRouter instead of BrowserRouter due to static hosting limitations
+// on Render. HashRouter uses fragment-based routing (#/route instead of /route) which doesn't
+// require server configuration for SPA routing.
+//
+// TODO: Consider switching back to BrowserRouter in the future if any of these are true:
+// 1. Render properly supports the _redirects file for SPA routing
+// 2. We switch to a different hosting provider (like Netlify or Vercel) with better SPA support
+// 3. We deploy frontend and backend together instead of as separate services
+//
+// To switch back:
+// 1. Import BrowserRouter instead of HashRouter
+// 2. Ensure _redirects file with "/* /index.html 200" is in the build output
+// 3. Configure the hosting platform to handle SPA routing correctly
 import { HashRouter } from 'react-router-dom';
 import { ApolloProvider } from '@apollo/client';
 import { CssBaseline, ThemeProvider } from '@mui/material';

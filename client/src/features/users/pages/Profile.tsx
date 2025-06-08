@@ -8,14 +8,15 @@ import { UPDATE_USER } from '../graphql/mutations';
 interface MeResponse {
   me: {
     _id: string;
-    username: string;
     email: string;
+    fullName: string;
+    isAdmin?: boolean;
   };
 }
 
 const Profile = () => {
   const { loading, data, refetch } = useQuery<MeResponse>(GET_ME);
-  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -33,7 +34,7 @@ const Profile = () => {
   // Sync data to form inputs
   useEffect(() => {
     if (data?.me) {
-      setUsername(data.me.username);
+      setFullName(data.me.fullName);
       setEmail(data.me.email);
     }
   }, [data]);
@@ -46,7 +47,7 @@ const Profile = () => {
       await updateUser({
         variables: {
           // Confirm your mutation input here!
-          username,
+          fullName,
           email,
         },
       });
@@ -63,7 +64,7 @@ const Profile = () => {
     );
   }
 
-  const isFormIncomplete = !username || !email;
+  const isFormIncomplete = !fullName || !email;
 
   return (
     <Container maxWidth="sm" sx={{ textAlign: 'center', marginTop: '50px' }}>
@@ -76,9 +77,9 @@ const Profile = () => {
 
       <TextField
         fullWidth
-        label="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        label="Full Name"
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
         sx={{ marginBottom: 3 }}
       />
       <TextField
