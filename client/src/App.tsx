@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import { ApolloProvider } from '@apollo/client';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 
@@ -10,16 +10,19 @@ import { ColorModeContext } from './context/ThemeMode';
 import { AuthProvider } from './context/AuthContext';
 
 const App: React.FC = () => {
-  const [mode, setMode] = useState<'light'|'dark'>('light');
+  const [mode, setMode] = useState<'light' | 'dark'>('light');
 
-  const colorMode = useMemo(() => ({
-    mode,
-    toggleColorMode: () => setMode(m => m === 'light' ? 'dark' : 'light'),
-  }), [mode]);
+  const colorMode = useMemo(
+    () => ({
+      mode,
+      toggleColorMode: () => setMode((m) => (m === 'light' ? 'dark' : 'light')),
+    }),
+    [mode],
+  );
 
   const theme = useMemo(() => getDesignTokens(mode), [mode]);
 
-  console.log("[ROUTER] Current pathname:", window.location.pathname);
+  console.log('[ROUTER] Current pathname:', window.location.pathname);
 
   return (
     <ApolloProvider client={client}>
@@ -27,9 +30,9 @@ const App: React.FC = () => {
         <AuthProvider>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            <BrowserRouter>
+            <HashRouter>
               <AppRoutes />
-            </BrowserRouter>
+            </HashRouter>
           </ThemeProvider>
         </AuthProvider>
       </ColorModeContext.Provider>
