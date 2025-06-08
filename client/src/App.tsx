@@ -19,6 +19,8 @@ const App: React.FC = () => {
 
   const theme = useMemo(() => getDesignTokens(mode), [mode]);
 
+  console.log("[ROUTER] Current pathname:", window.location.pathname);
+
   return (
     <ApolloProvider client={client}>
       <ColorModeContext.Provider value={colorMode}>

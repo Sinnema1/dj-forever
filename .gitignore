@@ -76,3 +76,4 @@ circleci/
 .cache
 .yarn-integrity
 .pnp.*
+WEBSITE_PROJECT_TEMPLATE.md
