@@ -49,13 +49,7 @@ const startApolloServer = async () => {
     );
 
     // 6) serve client in prod
-    if (process.env.NODE_ENV === "production") {
-      const clientBuild = path.resolve(__dirname, "../../client/dist");
-      app.use(express.static(clientBuild));
-      app.get("*", (_req: Request, res: Response) =>
-        res.sendFile(path.join(clientBuild, "index.html"))
-      );
-    }
+    // REMOVED: static file serving for client build, since frontend is deployed separately
 
     // 7) health check
     app.get("/health", (_req, res) => res.sendStatus(200));
