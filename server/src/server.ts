@@ -1,19 +1,13 @@
 import cors from "cors";
-import express, { Request, Response } from "express";
+import express from "express";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import db from "./config/connection.js";
 import { typeDefs, resolvers } from "./graphql/index.js";
 import { createContext } from "./graphql/context.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { CONFIG } from "./constants/config.js";
-
-// __dirname for ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const startApolloServer = async () => {
   try {
@@ -49,13 +43,7 @@ const startApolloServer = async () => {
     );
 
     // 6) serve client in prod
-    if (process.env.NODE_ENV === "production") {
-      const clientBuild = path.resolve(__dirname, "../../client/dist");
-      app.use(express.static(clientBuild));
-      app.get("*", (_req: Request, res: Response) =>
-        res.sendFile(path.join(clientBuild, "index.html"))
-      );
-    }
+    // REMOVED: static file serving for client build, since frontend is deployed separately
 
     // 7) health check
     app.get("/health", (_req, res) => res.sendStatus(200));
