@@ -36,13 +36,17 @@ const Dashboard = () => {
   
   // Update local context when we get fresh data from server
   useEffect(() => {
-    if (meData?.me && user) {
+    if (
+      meData?.me &&
+      (meData.me.fullName !== user?.fullName || meData.me.email !== user?.email || meData.me.isAdmin !== user?.isAdmin)
+    ) {
       updateUserInfo({
         fullName: meData.me.fullName,
-        email: meData.me.email
+        email: meData.me.email,
+        isAdmin: meData.me.isAdmin
       });
     }
-  }, [meData, updateUserInfo, user]);
+  }, [meData, updateUserInfo]);
 
   // Now conditionally render UI if user data isn't ready.
   if (!user) {

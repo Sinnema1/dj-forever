@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Container, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { useRSVP } from '../features/rsvp/hooks/useRSVP';
 
 const Home: React.FC = () => {
