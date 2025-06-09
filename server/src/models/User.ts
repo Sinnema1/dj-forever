@@ -14,6 +14,7 @@ export interface UserDocument extends Document {
   hasRSVPed: boolean;
   rsvpId?: Types.ObjectId | null;
   isInvited: boolean;
+  isAdmin: boolean;
 }
 
 /**
@@ -52,6 +53,10 @@ const userSchema = new Schema<UserDocument>(
       type: Boolean,
       required: true,
       default: false, // Set default value to false
+    },
+    isAdmin: {
+      type: Boolean,
+      default: false, // Most users are not admins by default
     },
   },
   {

@@ -122,6 +122,18 @@ export const updateUser = async (userId: string, updateData: { fullName?: string
       }
     }
 
+    // First get the existing user to ensure we have all required fields
+    const existingUser = await User.findById(userId).select("-password");
+    if (!existingUser) {
+      throw createError("User not found.", 404);
+    }
+    
+    // Make sure isAdmin is preserved (it should be false by default if not set)
+    if (existingUser.isAdmin === undefined) {
+      existingUser.isAdmin = false;
+      await existingUser.save();
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updateData },
