@@ -33,8 +33,6 @@ export interface CreateUserInput {
  * Input type for updating an existing user.
  */
 export interface UpdateUserInput {
-  _id: string; // ID of the user to update (required)
   fullName?: string;
   email?: string;
-  password?: string;
 }

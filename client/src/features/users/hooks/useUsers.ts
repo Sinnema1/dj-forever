@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@apollo/client';
 import { GET_ME } from '../graphql/queries';
-import { UPDATE_USER, DELETE_USER } from '../graphql/mutations';
+import { DELETE_USER, UPDATE_USER } from '../graphql/mutations';
 import { UserType, UpdateUserInput } from '../types/userTypes';
 
 interface GetMeResponse {
@@ -27,20 +27,19 @@ export const useUsers = () => {
   // Mutation to update a user
   const [updateUserMutation] = useMutation<
     UpdateUserResponse,
-    { id: string; input: UpdateUserInput }
+    { input: UpdateUserInput }
   >(UPDATE_USER);
 
   // Mutation to delete a user
   const [deleteUserMutation] = useMutation<DeleteUserResponse, { id: string }>(DELETE_USER);
 
   /**
-   * Updates the user and refetches the latest profile data.
-   * @param id - The user ID to update.
+   * Updates the current user's profile information.
    * @param input - The updated user information.
    */
-  const updateUser = async (id: string, input: UpdateUserInput): Promise<void> => {
-    await updateUserMutation({ variables: { id, input } });
-    // Explicitly check before calling refetchUser to satisfy ESLint
+  const updateUser = async (input: UpdateUserInput): Promise<void> => {
+    await updateUserMutation({ variables: { input } });
+    // Refetch user data after update
     if (refetchUser) {
       refetchUser();
     }

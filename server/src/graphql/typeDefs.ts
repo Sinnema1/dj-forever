@@ -51,6 +51,14 @@ const typeDefs = gql`
   }
 
   """
+  Input type for updating a user profile.
+  """
+  input UpdateUserInput {
+    fullName: String
+    email: String
+  }
+
+  """
   Query type for fetching user and RSVP details.
   """
   type Query {
@@ -63,6 +71,14 @@ const typeDefs = gql`
     Retrieves the RSVP of the authenticated user.
     """
     getRSVP: RSVP
+  }
+
+  """
+  Input type for updating user profile.
+  """
+  input UpdateUserInput {
+    fullName: String
+    email: String
   }
 
   """
@@ -82,6 +98,11 @@ const typeDefs = gql`
     Authenticates a user and returns a JWT token.
     """
     loginUser(email: String!, password: String!): AuthPayload
+
+    """
+    Updates the current user's profile information.
+    """
+    updateUser(input: UpdateUserInput!): User
 
     """
     Submits an RSVP for the authenticated user.

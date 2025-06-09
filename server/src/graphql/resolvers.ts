@@ -2,6 +2,7 @@ import {
   getUserById,
   createUser,
   authenticateUser,
+  updateUser,
 } from "../services/userService.js";
 
 // import invitedEmails from '../config/invitedList.js';
@@ -115,6 +116,26 @@ const resolvers = {
       } catch (error: any) {
         if (error.statusCode) throw error;
         throw createError(`Authentication failed: ${error.message}`, 401);
+      }
+    },
+
+    /**
+     * Updates the current user's profile information.
+     * @returns {Promise<User>} The updated user details.
+     */
+    updateUser: async (
+      _parent: any,
+      { input }: { input: { fullName?: string; email?: string } },
+      context: Context
+    ) => {
+      try {
+        if (!context.user)
+          throw new AuthenticationError("You must be logged in.");
+
+        return await updateUser(context.user._id, input);
+      } catch (error: any) {
+        if (error.statusCode) throw error;
+        throw createError(`User update failed: ${error.message}`, 400);
       }
     },
 
