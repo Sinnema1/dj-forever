@@ -1,11 +1,11 @@
 import React, { ReactElement } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 
 const PrivateRoute = ({ children }: { children: ReactElement }) => {
-  const { user } = useAuth(); // Assuming user is null when not logged in
+  const { isLoggedIn, user } = useAuth(); // Check both isLoggedIn and user
 
-  if (!user) {
+  if (!isLoggedIn || !user) {
     return <Navigate to="/login" replace />;
   }
 
