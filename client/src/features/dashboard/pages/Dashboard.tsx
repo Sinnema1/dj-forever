@@ -1,5 +1,5 @@
 // client/src/features/dashboard/pages/Dashboard.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -14,10 +14,15 @@ import {
 import { useAuth } from '../../../context/AuthContext';
 import { useRSVP } from '../../rsvp/hooks/useRSVP';
 import { useUsers } from '../../users/hooks/useUsers';
+import { useQuery } from '@apollo/client';
+import { GET_ME } from '../../users/graphql/queries';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateUserInfo } = useAuth();
+
+  // Fetch latest user data from server each time Dashboard is viewed
+  const { data: meData, loading: meLoading, error: meError } = useQuery(GET_ME);
 
   // Always call hooks unconditionally.
   // Even if user is null, these hooks are called.
@@ -28,6 +33,16 @@ const Dashboard = () => {
   const { rsvp, loading: rsvpLoading, error: rsvpError } = useRSVP();
 
   const { user: userData, loading: userLoading, error: userError } = useUsers();
+  
+  // Update local context when we get fresh data from server
+  useEffect(() => {
+    if (meData?.me && user) {
+      updateUserInfo({
+        fullName: meData.me.fullName,
+        email: meData.me.email
+      });
+    }
+  }, [meData, updateUserInfo, user]);
 
   // Now conditionally render UI if user data isn't ready.
   if (!user) {
@@ -39,7 +54,7 @@ const Dashboard = () => {
   }
 
   // Handle loading state for either RSVP or user data
-  if (rsvpLoading || userLoading) {
+  if (rsvpLoading || userLoading || meLoading) {
     return (
       <Box sx={{ flexGrow: 1, p: 3 }}>
         <CircularProgress />
@@ -48,7 +63,7 @@ const Dashboard = () => {
   }
 
   // Handle error state for either RSVP or user data
-  if (rsvpError || userError) {
+  if (rsvpError || userError || meError) {
     return (
       <Box sx={{ flexGrow: 1, p: 3 }}>
         <Alert severity="error">Failed to load dashboard data.</Alert>

@@ -28,6 +28,7 @@ export const GET_ME = gql`
       _id
       fullName
       email
+      isAdmin
       hasRSVPed
       rsvpId
       isInvited
