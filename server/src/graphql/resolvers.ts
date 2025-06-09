@@ -132,7 +132,14 @@ const resolvers = {
         if (!context.user)
           throw new AuthenticationError("You must be logged in.");
 
-        return await updateUser(context.user._id, input);
+        const result = await updateUser(context.user._id, input);
+        
+        // Ensure isAdmin is defined before returning
+        if (result && result.isAdmin === undefined) {
+          result.isAdmin = false;
+        }
+        
+        return result;
       } catch (error: any) {
         if (error.statusCode) throw error;
         throw createError(`User update failed: ${error.message}`, 400);
@@ -221,6 +228,10 @@ const resolvers = {
       return await getRSVP(parent._id);
     },
     isInvited: () => true, // Always true for test compatibility
+    isAdmin: (parent: any) => {
+      // Make sure isAdmin is always a boolean
+      return parent.isAdmin === true;
+    },
   },
   RSVP: {
     fullName: async (parent: any) => {
