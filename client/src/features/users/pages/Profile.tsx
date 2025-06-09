@@ -15,6 +15,7 @@ import {
 import { GET_ME } from '../graphql/queries';
 import { UPDATE_USER } from '../graphql/mutations';
 import { UpdateUserInput } from '../types/userTypes';
+import { useAuth } from '../../../context/AuthContext';
 
 // TypeScript interface for response matching the query
 interface MeResponse {
@@ -31,6 +32,7 @@ interface MeResponse {
 
 const Profile = () => {
   const { loading, data, refetch } = useQuery<MeResponse>(GET_ME);
+  const { updateUserInfo } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [editMode, setEditMode] = useState(false);
@@ -38,7 +40,15 @@ const Profile = () => {
   const [errorMessage, setErrorMessage] = useState('');
 
   const [updateUser, { loading: updating }] = useMutation(UPDATE_USER, {
-    onCompleted: () => {
+    onCompleted: (data) => {
+      // Update the user info in the AuthContext
+      if (data && data.updateUser) {
+        updateUserInfo({
+          fullName: data.updateUser.fullName,
+          email: data.updateUser.email
+        });
+      }
+      
       setSuccessMessage('Profile updated successfully!');
       setEditMode(false);
       // Refetch to get the latest data

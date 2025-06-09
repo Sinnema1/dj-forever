@@ -110,6 +110,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('user');
   };
 
+  /**
+   * Update user information in context and localStorage
+   */
+  const updateUserInfo = (userData: Partial<UserType>) => {
+    if (!user) return;
+    
+    const updatedUser = {...user, ...userData};
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
   // Context value exposed to consumers
   const value: AuthContextType = {
     user,
@@ -117,6 +128,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     login,
     registerUser,
     logout,
+    updateUserInfo,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
