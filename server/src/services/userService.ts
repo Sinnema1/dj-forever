@@ -95,3 +95,45 @@ export const authenticateUser = async (email: string, password: string) => {
     throw createError(`Authentication failed: ${error.message}`, 401);
   }
 };
+
+/**
+ * Updates a user's profile information.
+ *
+ * @param {string} userId - The user's ID.
+ * @param {object} updateData - The data to update (fullName and/or email).
+ * @returns {Promise<User>} - The updated user object.
+ * @throws {Error} - If the user is not found or update fails.
+ */
+export const updateUser = async (userId: string, updateData: { fullName?: string; email?: string }) => {
+  try {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw createError("Invalid user ID.", 400);
+    }
+
+    // Check if email is being updated and if it's already in use by another user
+    if (updateData.email) {
+      const existingUser = await User.findOne({ 
+        email: updateData.email,
+        _id: { $ne: userId }
+      });
+      
+      if (existingUser) {
+        throw createError("Email is already in use by another user.", 400);
+      }
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      throw createError("User not found.", 404);
+    }
+
+    return updatedUser;
+  } catch (error: any) {
+    throw createError(`Error updating user: ${error.message}`, 500);
+  }
+};

@@ -75,3 +75,20 @@ export const DELETE_RSVP = gql`
     }
   }
 `;
+
+/**
+ * Edit an existing RSVP
+ */
+export const EDIT_RSVP = gql`
+  mutation EditRSVP($updates: RSVPInput!) {
+    editRSVP(updates: $updates) {
+      _id
+      userId
+      attending
+      mealPreference
+      allergies
+      additionalNotes
+      fullName
+    }
+  }
+`;

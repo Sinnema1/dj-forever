@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -21,17 +21,30 @@ import { RSVPFormData } from '../types/rsvpTypes';
  * RSVPForm component renders the RSVP submission form.
  */
 const RSVPForm: React.FC = () => {
-  // Get the createRSVP function and loading state from the custom useRSVP hook.
-  const { createRSVP, loading } = useRSVP();
+  // Get the createRSVP/editRSVP functions, rsvp data and loading state from the custom useRSVP hook.
+  const { createRSVP, editRSVP, rsvp, loading } = useRSVP();
 
   // Local state for the RSVP form data, typed with RSVPFormData.
   const [formData, setFormData] = useState<RSVPFormData>({
-    fullName: '',
-    attending: "NO", // default to "NO" (enum string)
-    mealPreference: '',
-    allergies: '',
-    additionalNotes: '',
+    fullName: rsvp?.fullName || '',
+    attending: rsvp?.attending || 'NO', // default to "NO" (enum string)
+    mealPreference: rsvp?.mealPreference || '',
+    allergies: rsvp?.allergies || '',
+    additionalNotes: rsvp?.additionalNotes || '',
   });
+
+  // Update form data when RSVP data is loaded or changes
+  React.useEffect(() => {
+    if (rsvp) {
+      setFormData({
+        fullName: rsvp.fullName || '',
+        attending: rsvp.attending || 'NO',
+        mealPreference: rsvp.mealPreference || '',
+        allergies: rsvp.allergies || '',
+        additionalNotes: rsvp.additionalNotes || '',
+      });
+    }
+  }, [rsvp]);
 
   // Local state for feedback messages.
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -57,7 +70,7 @@ const RSVPForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value as "YES" | "NO" | "MAYBE",
+      [name]: value as 'YES' | 'NO' | 'MAYBE',
     }));
   };
 
@@ -75,19 +88,23 @@ const RSVPForm: React.FC = () => {
     }
 
     try {
-      // Submit the RSVP data.
-      await createRSVP({
-        ...formData,
-      });
-      // On success, show a success message and reset the form.
-      setSuccessMessage('RSVP submitted successfully!');
-      setFormData({
-        fullName: '',
-        attending: "NO",
-        mealPreference: '',
-        allergies: '',
-        additionalNotes: '',
-      });
+      if (rsvp) {
+        // Update existing RSVP
+        await editRSVP({
+          attending: formData.attending,
+          mealPreference: formData.mealPreference,
+          allergies: formData.allergies,
+          additionalNotes: formData.additionalNotes,
+        });
+      } else {
+        // Submit new RSVP data
+        await createRSVP({
+          ...formData,
+        });
+      }
+
+      // On success, show a success message
+      setSuccessMessage(rsvp ? 'RSVP updated successfully!' : 'RSVP submitted successfully!');
     } catch (error: unknown) {
       // Safely narrow the error type.
       const errMsg =
@@ -108,8 +125,14 @@ const RSVPForm: React.FC = () => {
     <Container maxWidth="sm">
       {/* Page Title */}
       <Typography variant="h4" gutterBottom align="center">
-        RSVP Form
+        {rsvp ? 'Update RSVP' : 'RSVP Form'}
       </Typography>
+
+      {rsvp && (
+        <Typography variant="body2" color="textSecondary" align="center" sx={{ mb: 2 }}>
+          Note: To change your name, please update your profile settings instead.
+        </Typography>
+      )}
 
       {/* Form Container */}
       <Box
@@ -125,16 +148,18 @@ const RSVPForm: React.FC = () => {
           backgroundColor: 'background.paper',
         }}
       >
-        {/* Full Name Field */}
+        {/* Full Name Field (readonly because name is managed in profile) */}
         <TextField
           label="Full Name"
           name="fullName"
           value={formData.fullName}
-          onChange={handleInputChange}
+          InputProps={{
+            readOnly: true,
+          }}
+          helperText="Name is managed in your profile settings"
           fullWidth
           required
           margin="normal"
-          autoFocus
         />
 
         {/* Attending Select Field */}
@@ -188,7 +213,7 @@ const RSVPForm: React.FC = () => {
 
         {/* Submit Button */}
         <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }} disabled={loading}>
-          {loading ? <CircularProgress size={24} /> : 'Submit RSVP'}
+          {loading ? <CircularProgress size={24} /> : rsvp ? 'Update RSVP' : 'Submit RSVP'}
         </Button>
       </Box>
 
