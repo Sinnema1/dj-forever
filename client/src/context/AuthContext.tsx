@@ -74,20 +74,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         variables: { fullName, email, password },
       });
 
-      // Expecting the mutation to return a token and a user object with isInvited
-      const authToken: string = data?.register?.token;
-      const authUser: UserType = data?.register?.user;
+      // Use the correct response key from the GraphQL mutation
+      const authToken: string = data?.registerUser?.token;
+      const authUser: UserType = data?.registerUser?.user;
 
       if (!authToken || !authUser) {
         throw new Error('Invalid registration response.');
       }
 
-      // Optional: warn if isInvited is missing from the response
+      // Warn if isInvited is true for a self-registered user
+      if (authUser.isInvited === true) {
+        console.warn('Warning: Self-registered user should not have isInvited=true.');
+      }
       if (authUser.isInvited === undefined) {
         console.warn('Warning: isInvited field is missing from the registration response.');
       }
 
-      // Update state and localStorage
       setToken(authToken);
       setUser(authUser);
       localStorage.setItem('id_token', authToken);
@@ -115,8 +117,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
    */
   const updateUserInfo = (userData: Partial<UserType>) => {
     if (!user) return;
-    
-    const updatedUser = {...user, ...userData};
+
+    const updatedUser = { ...user, ...userData };
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
